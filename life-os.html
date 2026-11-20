@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#eef5f9">
+  <title>Life OS — 让日常井然有序</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #203342;
+      --muted: #8293a0;
+      --line: rgba(139, 166, 184, .19);
+      --blue: #6caed8;
+      --blue-dark: #4a91c1;
+      --white-glass: rgba(255, 255, 255, .76);
+      --shadow: 0 18px 55px rgba(62, 94, 117, .09), 0 2px 8px rgba(62, 94, 117, .04);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      overflow-x: hidden;
+      background:
+        radial-gradient(ellipse at 8% 2%, rgba(201, 230, 246, .65), transparent 34rem),
+        radial-gradient(ellipse at 96% 28%, rgba(220, 236, 245, .7), transparent 29rem),
+        linear-gradient(145deg, #f8fbfd 0%, #eff5f8 53%, #f7fafb 100%);
+      color: var(--ink);
+      font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body::before,
+    body::after {
+      position: fixed;
+      z-index: -1;
+      width: 20rem;
+      height: 20rem;
+      border-radius: 50%;
+      background: rgba(210, 235, 248, .42);
+      content: "";
+      filter: blur(70px);
+      pointer-events: none;
+    }
+
+    body::before { top: 28%; left: -12rem; }
+    body::after { right: -12rem; bottom: -7rem; }
+
+    button, input, textarea { font: inherit; }
+    button { color: inherit; }
+
+    .app-shell {
+      width: min(1120px, calc(100% - 64px));
+      margin: 0 auto;
+      padding: 34px 0 42px;
+    }
+
+    .topbar,
+    .brand,
+    .date-pill,
+    .section-heading,
+    .task-row,
+    .habit-row,
+    .progress-meta,
+    .dialog-actions {
+      display: flex;
+      align-items: center;
+    }
+
+    .topbar { justify-content: space-between; }
+    .brand { gap: 12px; }
+
+    .brand-mark {
+      display: grid;
+      width: 40px;
+      height: 40px;
+      place-items: center;
+      border: 1px solid rgba(255, 255, 255, .9);
+      border-radius: 14px;
+      background: linear-gradient(145deg, #fff, #e6f3fa);
+      box-shadow: 0 6px 18px rgba(89, 143, 177, .13);
+      color: var(--blue-dark);
+      font-size: 19px;
+    }
+
+    .brand-name {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 650;
+      letter-spacing: .04em;
+    }
+
+    .brand-caption {
+      margin: 3px 0 0;
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: .1em;
+    }
+
+    .date-pill {
+      gap: 9px;
+      padding: 10px 15px;
+      border: 1px solid rgba(255, 255, 255, .82);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .56);
+      color: #607789;
+      font-size: 12px;
+      box-shadow: 0 5px 20px rgba(62, 94, 117, .04);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+
+    .date-icon { color: var(--blue-dark); font-size: 15px; }
+
+    .welcome {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 24px;
+      margin: 53px 0 29px;
+    }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      color: var(--blue-dark);
+      font-size: 11px;
+      font-weight: 650;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(29px, 4vw, 39px);
+      font-weight: 570;
+      letter-spacing: -.045em;
+      line-height: 1.2;
+    }
+
+    .welcome-copy {
+      margin: 11px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .welcome-note {
+      max-width: 215px;
+      margin: 0 0 3px;
+      color: #7e9bad;
+      font-size: 12px;
+      line-height: 1.8;
+      text-align: right;
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(290px, .75fr);
+      align-items: start;
+      gap: 20px;
+    }
+
+    .column-stack { display: grid; gap: 20px; }
+
+    .card {
+      border: 1px solid rgba(255, 255, 255, .88);
+      border-radius: 22px;
+      background: var(--white-glass);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+
+    .tasks-card,
+    .habits-card,
+    .mood-card,
+    .reset-card { padding: 24px; }
+
+    .section-heading {
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 19px;
+    }
+
+    .section-title {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 650;
+      letter-spacing: -.015em;
+    }
+
+    .section-subtitle {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .count-badge {
+      flex: 0 0 auto;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #f0f6f9;
+      color: #708797;
+      font-size: 11px;
+    }
+
+    .entry-form {
+      display: flex;
+      gap: 9px;
+      margin-bottom: 14px;
+    }
+
+    .text-input,
+    .note-input {
+      min-width: 0;
+      border: 1px solid #e6edf1;
+      outline: 0;
+      background: rgba(255, 255, 255, .74);
+      color: var(--ink);
+      transition: border-color .2s, box-shadow .2s, background .2s;
+    }
+
+    .text-input {
+      flex: 1;
+      height: 44px;
+      padding: 0 14px;
+      border-radius: 13px;
+      font-size: 13px;
+    }
+
+    .text-input::placeholder,
+    .note-input::placeholder { color: #a7b5bf; }
+
+    .text-input:focus,
+    .note-input:focus {
+      border-color: #9dc9e3;
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(108, 174, 216, .12);
+    }
+
+    .primary-button {
+      display: inline-flex;
+      flex: 0 0 auto;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      min-height: 42px;
+      padding: 0 16px;
+      border: 0;
+      border-radius: 13px;
+      background: linear-gradient(135deg, #85bfdf, #65a8d1);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 650;
+      box-shadow: 0 7px 16px rgba(95, 159, 198, .2);
+      cursor: pointer;
+      transition: transform .18s, box-shadow .18s, filter .18s;
+    }
+
+    .primary-button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 9px 20px rgba(95, 159, 198, .28);
+      filter: saturate(1.05);
+    }
+
+    .primary-button:active { transform: translateY(0); }
+
+    .task-list,
+    .habit-list {
+      display: grid;
+      gap: 8px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .task-row,
+    .habit-row {
+      min-height: 49px;
+      gap: 11px;
+      padding: 9px 10px 9px 12px;
+      border: 1px solid transparent;
+      border-radius: 13px;
+      background: rgba(247, 250, 252, .82);
+      transition: background .2s, border-color .2s;
+    }
+
+    .task-row:hover,
+    .habit-row:hover {
+      border-color: #e6f0f5;
+      background: #f6fafc;
+    }
+
+    .check-input {
+      width: 17px;
+      height: 17px;
+      flex: 0 0 auto;
+      margin: 0;
+      accent-color: var(--blue-dark);
+      cursor: pointer;
+    }
+
+    .item-label {
+      min-width: 0;
+      flex: 1;
+      color: #435765;
+      font-size: 13px;
+      line-height: 1.45;
+      overflow-wrap: anywhere;
+      cursor: pointer;
+    }
+
+    .is-done .item-label {
+      color: #9aa8b1;
+      text-decoration: line-through;
+      text-decoration-color: #b7c8d2;
+    }
+
+    .icon-button {
+      display: grid;
+      width: 30px;
+      height: 30px;
+      flex: 0 0 auto;
+      place-items: center;
+      border: 0;
+      border-radius: 9px;
+      background: transparent;
+      color: #94a5b1;
+      font-size: 17px;
+      cursor: pointer;
+      transition: background .18s, color .18s;
+    }
+
+    .icon-button:hover {
+      background: #fff0ef;
+      color: #c97b78;
+    }
+
+    .empty-state {
+      padding: 18px 12px 12px;
+      color: #97a7b2;
+      font-size: 12px;
+      line-height: 1.7;
+      text-align: center;
+    }
+
+    .habit-row { min-height: 52px; }
+
+    .habit-mark {
+      display: grid;
+      width: 30px;
+      height: 30px;
+      flex: 0 0 auto;
+      place-items: center;
+      border-radius: 10px;
+      background: #eaf4f9;
+      color: #679dbb;
+      font-size: 14px;
+    }
+
+    .habit-progress {
+      margin: 14px 0 0;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .progress-card {
+      padding: 24px;
+      background:
+        radial-gradient(circle at 90% 10%, rgba(222, 241, 250, .85), transparent 45%),
+        var(--white-glass);
+    }
+
+    .progress-content {
+      display: flex;
+      align-items: center;
+      gap: 19px;
+      padding: 2px 0 5px;
+    }
+
+    .progress-ring {
+      display: grid;
+      width: 112px;
+      height: 112px;
+      flex: 0 0 auto;
+      place-items: center;
+      border-radius: 50%;
+      background: conic-gradient(var(--blue) var(--progress, 0%), #e7eff3 0);
+      box-shadow: 0 7px 18px rgba(87, 147, 182, .12);
+    }
+
+    .progress-ring-inner {
+      display: grid;
+      width: 91px;
+      height: 91px;
+      place-content: center;
+      border: 1px solid rgba(255, 255, 255, .9);
+      border-radius: 50%;
+      background: #f9fcfd;
+      text-align: center;
+    }
+
+    .progress-value {
+      font-size: 27px;
+      font-weight: 650;
+      letter-spacing: -.06em;
+      line-height: 1;
+    }
+
+    .progress-caption {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .progress-copy { min-width: 0; }
+    .progress-copy strong { display: block; font-size: 13px; font-weight: 650; }
+    .progress-copy span {
+      display: block;
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.65;
+    }
+
+    .progress-meta {
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 17px;
+      padding-top: 14px;
+      border-top: 1px solid var(--line);
+      color: #718592;
+      font-size: 11px;
+    }
+
+    .mood-options {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 7px;
+      margin-top: 17px;
+    }
+
+    .mood-button {
+      display: grid;
+      min-width: 0;
+      min-height: 67px;
+      align-content: center;
+      justify-items: center;
+      gap: 5px;
+      padding: 7px 3px;
+      border: 1px solid transparent;
+      border-radius: 13px;
+      background: rgba(245, 249, 251, .8);
+      color: #8799a5;
+      cursor: pointer;
+      transition: transform .18s, border-color .18s, background .18s, color .18s;
+    }
+
+    .mood-button:hover { transform: translateY(-2px); background: #fff; }
+    .mood-button[aria-pressed="true"] {
+      border-color: #b9d9eb;
+      background: #edf7fc;
+      color: #4d86a9;
+      box-shadow: 0 5px 14px rgba(97, 158, 194, .1);
+    }
+
+    .mood-emoji { font-size: 21px; line-height: 1; }
+    .mood-label { font-size: 10px; white-space: nowrap; }
+
+    .note-label {
+      display: block;
+      margin: 18px 0 8px;
+      color: #758995;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .note-input {
+      display: block;
+      width: 100%;
+      min-height: 74px;
+      padding: 11px 12px;
+      resize: vertical;
+      border-radius: 12px;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .reset-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding-top: 18px;
+      padding-bottom: 18px;
+    }
+
+    .reset-copy strong { display: block; font-size: 12px; font-weight: 650; }
+    .reset-copy span {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.5;
+    }
+
+    .quiet-button {
+      flex: 0 0 auto;
+      min-height: 35px;
+      padding: 0 12px;
+      border: 1px solid #e3eaee;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, .64);
+      color: #718592;
+      font-size: 11px;
+      cursor: pointer;
+      transition: border-color .18s, color .18s, background .18s;
+    }
+
+    .quiet-button:hover {
+      border-color: #efc6c3;
+      background: #fff8f7;
+      color: #b96f6c;
+    }
+
+    .status-line {
+      min-height: 18px;
+      margin: 20px 2px 0;
+      color: #7d929f;
+      font-size: 11px;
+      text-align: right;
+    }
+
+    .status-line[data-kind="error"] { color: #b96f6c; }
+    .status-line[data-kind="success"] { color: #6b9b84; }
+
+    dialog {
+      width: min(420px, calc(100% - 32px));
+      padding: 0;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, .92);
+      border-radius: 20px;
+      background: #fafdfe;
+      color: var(--ink);
+      box-shadow: 0 24px 80px rgba(34, 57, 72, .24);
+    }
+
+    dialog::backdrop {
+      background: rgba(31, 51, 65, .25);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+    }
+
+    .dialog-content { padding: 25px; }
+    .dialog-content h2 { margin: 0; font-size: 18px; font-weight: 650; }
+    .dialog-content p {
+      margin: 10px 0 22px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .dialog-actions { justify-content: flex-end; gap: 9px; }
+
+    .dialog-button {
+      min-height: 39px;
+      padding: 0 15px;
+      border: 1px solid #e2eaf0;
+      border-radius: 11px;
+      background: #fff;
+      color: #627885;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .dialog-button.danger {
+      border-color: #d98784;
+      background: #d98784;
+      color: white;
+    }
+
+    button:focus-visible,
+    input:focus-visible,
+    textarea:focus-visible {
+      outline: 3px solid rgba(93, 157, 195, .28);
+      outline-offset: 2px;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      clip-path: inset(50%);
+    }
+
+    @media (max-width: 760px) {
+      .app-shell { width: min(100% - 36px, 560px); padding-top: 23px; }
+      .welcome { align-items: flex-start; margin: 39px 0 23px; }
+      .welcome-note { display: none; }
+      .dashboard { grid-template-columns: 1fr; gap: 16px; }
+      .column-stack { gap: 16px; }
+      .progress-card { padding: 20px; }
+      .progress-content { justify-content: center; }
+      .progress-meta { margin-top: 13px; padding-top: 12px; }
+      .tasks-card, .habits-card, .mood-card, .reset-card { padding: 20px; }
+      .status-line { margin-top: 15px; }
+    }
+
+    @media (max-width: 420px) {
+      .app-shell { width: calc(100% - 28px); padding-top: 17px; }
+      .brand-mark { width: 36px; height: 36px; border-radius: 12px; }
+      .brand-name { font-size: 14px; }
+      .brand-caption { font-size: 10px; }
+      .date-pill { gap: 6px; padding: 8px 10px; font-size: 10px; }
+      .date-icon { font-size: 13px; }
+      .welcome { margin-top: 32px; }
+      .entry-form { gap: 7px; }
+      .text-input { padding: 0 10px; font-size: 12px; }
+      .primary-button { padding: 0 12px; font-size: 11px; }
+      .mood-options { gap: 4px; }
+      .mood-button { min-height: 63px; }
+      .mood-label { font-size: 9px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">✦</div>
+        <div>
+          <p class="brand-name">Life OS</p>
+          <p class="brand-caption">YOUR PERSONAL SPACE</p>
+        </div>
+      </div>
+      <div class="date-pill">
+        <span class="date-icon" aria-hidden="true">◷</span>
+        <time id="todayDate"></time>
+      </div>
+    </header>
+
+    <main>
+      <section class="welcome" aria-labelledby="welcomeTitle">
+        <div>
+          <p class="eyebrow">A LITTLE BETTER, EVERY DAY</p>
+          <h1 id="welcomeTitle"><span id="greeting"></span>，开启自在的一天。</h1>
+          <p class="welcome-copy">把重要的事情慢慢做好，也别忘了照顾自己。</p>
+        </div>
+        <p class="welcome-note">不必追赶所有事，<br>专注此刻就很好。</p>
+      </section>
+
+      <section class="dashboard" aria-label="今日生活面板">
+        <div class="column-stack">
+          <section class="card tasks-card" aria-labelledby="tasksTitle">
+            <div class="section-heading">
+              <div>
+                <h2 class="section-title" id="tasksTitle">今日任务</h2>
+                <p class="section-subtitle">为今天安排几件重要的小事</p>
+              </div>
+              <span class="count-badge" id="taskCount">0 项</span>
+            </div>
+            <form class="entry-form" id="taskForm">
+              <label class="sr-only" for="taskInput">添加一项今日任务</label>
+              <input class="text-input" id="taskInput" name="task" maxlength="80" autocomplete="off" placeholder="例如：完成项目提案" required>
+              <button class="primary-button" type="submit"><span aria-hidden="true">＋</span> 添加任务</button>
+            </form>
+            <ul class="task-list" id="taskList" aria-live="polite"></ul>
+          </section>
+
+          <section class="card habits-card" aria-labelledby="habitsTitle">
+            <div class="section-heading">
+              <div>
+                <h2 class="section-title" id="habitsTitle">每日习惯</h2>
+                <p class="section-subtitle">用小小的坚持，积累喜欢的生活</p>
+              </div>
+              <span class="count-badge" id="habitCount">0 / 0</span>
+            </div>
+            <form class="entry-form" id="habitForm">
+              <label class="sr-only" for="habitInput">添加一个每日习惯</label>
+              <input class="text-input" id="habitInput" name="habit" maxlength="40" autocomplete="off" placeholder="添加习惯，例如：散步 20 分钟" required>
+              <button class="primary-button" type="submit"><span aria-hidden="true">＋</span> 添加习惯</button>
+            </form>
+            <ul class="habit-list" id="habitList" aria-live="polite"></ul>
+            <p class="habit-progress" id="habitProgress"></p>
+          </section>
+        </div>
+
+        <div class="column-stack right-column">
+          <section class="card progress-card" aria-labelledby="progressTitle">
+            <div class="section-heading">
+              <div>
+                <h2 class="section-title" id="progressTitle">今日进度</h2>
+                <p class="section-subtitle">每一步都值得被看见</p>
+              </div>
+            </div>
+            <div class="progress-content">
+              <div class="progress-ring" id="progressRing" role="img" aria-label="任务完成率 0%">
+                <div class="progress-ring-inner">
+                  <span class="progress-value" id="progressValue">0%</span>
+                  <span class="progress-caption">任务完成</span>
+                </div>
+              </div>
+              <div class="progress-copy">
+                <strong id="progressMessage">从一件小事开始</strong>
+                <span id="progressDetail">添加今天的任务，规划自己的节奏。</span>
+              </div>
+            </div>
+            <div class="progress-meta">
+              <span>已完成 <strong id="completedCount">0</strong> 项</span>
+              <span>共 <strong id="totalCount">0</strong> 项任务</span>
+            </div>
+          </section>
+
+          <section class="card mood-card" aria-labelledby="moodTitle">
+            <div class="section-heading">
+              <div>
+                <h2 class="section-title" id="moodTitle">此刻心情</h2>
+                <p class="section-subtitle">给今天的自己一点关注</p>
+              </div>
+            </div>
+            <div class="mood-options" role="group" aria-label="选择今天的心情">
+              <button class="mood-button" type="button" data-mood="happy" aria-pressed="false" aria-label="开心">
+                <span class="mood-emoji" aria-hidden="true">☀️</span><span class="mood-label">开心</span>
+              </button>
+              <button class="mood-button" type="button" data-mood="calm" aria-pressed="false" aria-label="平静">
+                <span class="mood-emoji" aria-hidden="true">☁️</span><span class="mood-label">平静</span>
+              </button>
+              <button class="mood-button" type="button" data-mood="tired" aria-pressed="false" aria-label="疲惫">
+                <span class="mood-emoji" aria-hidden="true">🌙</span><span class="mood-label">疲惫</span>
+              </button>
+              <button class="mood-button" type="button" data-mood="anxious" aria-pressed="false" aria-label="焦虑">
+                <span class="mood-emoji" aria-hidden="true">🌧️</span><span class="mood-label">焦虑</span>
+              </button>
+              <button class="mood-button" type="button" data-mood="grateful" aria-pressed="false" aria-label="感恩">
+                <span class="mood-emoji" aria-hidden="true">✨</span><span class="mood-label">感恩</span>
+              </button>
+            </div>
+            <label class="note-label" for="moodNote">写给今天的一句话 <span aria-hidden="true">· 选填</span></label>
+            <textarea class="note-input" id="moodNote" maxlength="240" placeholder="记录此刻的想法或感受…"></textarea>
+          </section>
+
+          <section class="card reset-card" aria-label="清空今日记录">
+            <div class="reset-copy">
+              <strong>重新整理今天</strong>
+              <span>清空任务和心情，保留习惯并重置打卡。</span>
+            </div>
+            <button class="quiet-button" id="openClearDialog" type="button">清空今日</button>
+          </section>
+        </div>
+      </section>
+      <p class="status-line" id="statusMessage" role="status" aria-live="polite"></p>
+    </main>
+  </div>
+
+  <dialog id="clearDialog" aria-labelledby="dialogTitle" aria-describedby="dialogDescription">
+    <div class="dialog-content">
+      <h2 id="dialogTitle">确定清空今天的记录吗？</h2>
+      <p id="dialogDescription">今日任务和心情记录会被删除；每日习惯会保留，但打卡状态将重置。此操作无法撤销。</p>
+      <div class="dialog-actions">
+        <button class="dialog-button" id="cancelClear" type="button">再想一想</button>
+        <button class="dialog-button danger" id="confirmClear" type="button">确认清空</button>
+      </div>
+    </div>
+  </dialog>
+
+  <script>
+    "use strict";
+
+    const STORAGE_PREFIX = "life-os-day-v1:";
+    const MOODS = ["happy", "calm", "tired", "anxious", "grateful"];
+    const DEFAULT_HABITS = [
+      { id: "habit-reading", name: "阅读 20 分钟", icon: "▤" },
+      { id: "habit-movement", name: "活动一下身体", icon: "↗" },
+      { id: "habit-learning", name: "学习新知识", icon: "◇" }
+    ];
+
+    const taskForm = document.getElementById("taskForm");
+    const taskInput = document.getElementById("taskInput");
+    const taskList = document.getElementById("taskList");
+    const habitForm = document.getElementById("habitForm");
+    const habitInput = document.getElementById("habitInput");
+    const habitList = document.getElementById("habitList");
+    const moodNote = document.getElementById("moodNote");
+    const statusMessage = document.getElementById("statusMessage");
+    const clearDialog = document.getElementById("clearDialog");
+
+    function getDateKey(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    const todayKey = getDateKey(new Date());
+    const storageKey = `${STORAGE_PREFIX}${todayKey}`;
+
+    function createId() {
+      return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`;
+    }
+
+    function createDefaultDay() {
+      return {
+        tasks: [],
+        habits: DEFAULT_HABITS.map(habit => ({ ...habit, done: false })),
+        mood: null,
+        moodNote: ""
+      };
+    }
+
+    function normalizeItems(items, kind) {
+      return items.filter(item =>
+        item &&
+        typeof item.id === "string" &&
+        typeof item.name === "string" &&
+        typeof item.done === "boolean"
+      ).map(item => ({
+        id: item.id,
+        name: item.name.slice(0, kind === "task" ? 80 : 40),
+        done: item.done,
+        ...(kind === "habit" ? { icon: typeof item.icon === "string" ? item.icon : "✦" } : {})
+      }));
+    }
+
+    function normalizeDay(value) {
+      if (!value || typeof value !== "object" || Array.isArray(value) ||
+          !Array.isArray(value.tasks) || !Array.isArray(value.habits)) {
+        throw new Error("Saved day data has an invalid shape.");
+      }
+
+      return {
+        tasks: normalizeItems(value.tasks, "task"),
+        habits: normalizeItems(value.habits, "habit"),
+        mood: MOODS.includes(value.mood) ? value.mood : null,
+        moodNote: typeof value.moodNote === "string" ? value.moodNote.slice(0, 240) : ""
+      };
+    }
+
+    function setStatus(message, kind) {
+      statusMessage.textContent = message;
+      statusMessage.dataset.kind = kind || "";
+    }
+
+    function loadDay() {
+      try {
+        const saved = localStorage.getItem(storageKey);
+        return saved ? normalizeDay(JSON.parse(saved)) : createDefaultDay();
+      } catch (error) {
+        console.error("Unable to load today's Life OS data.", error);
+        setStatus("读取本地记录失败，当前显示空白记录；请检查浏览器存储设置。", "error");
+        return createDefaultDay();
+      }
+    }
+
+    let day = loadDay();
+
+    function saveDay() {
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(day));
+        setStatus("已自动保存到此设备", "success");
+      } catch (error) {
+        console.error("Unable to save today's Life OS data.", error);
+        setStatus("保存失败，请检查浏览器存储空间或隐私设置。", "error");
+      }
+    }
+
+    function greetingForHour(hour) {
+      if (hour < 6) return "夜深了";
+      if (hour < 11) return "早上好";
+      if (hour < 14) return "中午好";
+      if (hour < 18) return "下午好";
+      return "晚上好";
+    }
+
+    function renderDate() {
+      const now = new Date();
+      document.getElementById("todayDate").textContent =
+        new Intl.DateTimeFormat("zh-CN", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+          weekday: "long"
+        }).format(now);
+      document.getElementById("greeting").textContent = greetingForHour(now.getHours());
+    }
+
+    function makeCheckBox(item, labelText, onChange) {
+      const checkbox = document.createElement("input");
+      checkbox.className = "check-input";
+      checkbox.type = "checkbox";
+      checkbox.checked = item.done;
+      checkbox.setAttribute("aria-label", labelText);
+      checkbox.addEventListener("change", onChange);
+      return checkbox;
+    }
+
+    function makeDeleteButton(label, onClick) {
+      const button = document.createElement("button");
+      button.className = "icon-button";
+      button.type = "button";
+      button.textContent = "×";
+      button.setAttribute("aria-label", label);
+      button.title = label;
+      button.addEventListener("click", onClick);
+      return button;
+    }
+
+    function renderTasks() {
+      taskList.replaceChildren();
+      const completed = day.tasks.filter(task => task.done).length;
+      document.getElementById("taskCount").textContent = `${completed} / ${day.tasks.length} 项`;
+
+      if (day.tasks.length === 0) {
+        const empty = document.createElement("li");
+        empty.className = "empty-state";
+        empty.textContent = "今天还没有任务。添加一项，轻轻开启你的节奏。";
+        taskList.append(empty);
+        return;
+      }
+
+      day.tasks.forEach(task => {
+        const row = document.createElement("li");
+        row.className = `task-row${task.done ? " is-done" : ""}`;
+        row.append(makeCheckBox(task, `完成任务：${task.name}`, () => {
+          task.done = !task.done;
+          saveDay();
+          render();
+        }));
+
+        const label = document.createElement("span");
+        label.className = "item-label";
+        label.textContent = task.name;
+        row.append(label);
+        row.append(makeDeleteButton(`删除任务：${task.name}`, () => {
+          day.tasks = day.tasks.filter(item => item.id !== task.id);
+          saveDay();
+          render();
+        }));
+        taskList.append(row);
+      });
+    }
+
+    function renderHabits() {
+      habitList.replaceChildren();
+      const completed = day.habits.filter(habit => habit.done).length;
+      document.getElementById("habitCount").textContent = `${completed} / ${day.habits.length}`;
+      document.getElementById("habitProgress").textContent = day.habits.length
+        ? `今天已完成 ${completed} / ${day.habits.length} 个习惯`
+        : "添加一个习惯，为今天留下一点温柔的坚持。";
+
+      day.habits.forEach(habit => {
+        const row = document.createElement("li");
+        row.className = `habit-row${habit.done ? " is-done" : ""}`;
+        row.append(makeCheckBox(habit, `完成习惯：${habit.name}`, () => {
+          habit.done = !habit.done;
+          saveDay();
+          render();
+        }));
+
+        const icon = document.createElement("span");
+        icon.className = "habit-mark";
+        icon.setAttribute("aria-hidden", "true");
+        icon.textContent = habit.icon;
+        row.append(icon);
+
+        const label = document.createElement("span");
+        label.className = "item-label";
+        label.textContent = habit.name;
+        row.append(label);
+        row.append(makeDeleteButton(`删除习惯：${habit.name}`, () => {
+          day.habits = day.habits.filter(item => item.id !== habit.id);
+          saveDay();
+          render();
+        }));
+        habitList.append(row);
+      });
+    }
+
+    function renderProgress() {
+      const total = day.tasks.length;
+      const completed = day.tasks.filter(task => task.done).length;
+      const percentage = total ? Math.round(completed / total * 100) : 0;
+
+      document.getElementById("progressRing").style.setProperty("--progress", `${percentage}%`);
+      document.getElementById("progressRing").setAttribute("aria-label", `任务完成率 ${percentage}%`);
+      document.getElementById("progressValue").textContent = `${percentage}%`;
+      document.getElementById("completedCount").textContent = String(completed);
+      document.getElementById("totalCount").textContent = String(total);
+
+      let message = "从一件小事开始";
+      let detail = "添加今天的任务，规划自己的节奏。";
+      if (total && percentage === 100) {
+        message = "今天做得很棒";
+        detail = "所有任务都已完成，记得给自己一点奖励。";
+      } else if (percentage > 0) {
+        message = "正在稳步前进";
+        detail = "保持自己的节奏，一步一步来就很好。";
+      } else if (total) {
+        message = "准备好开始了吗？";
+        detail = "完成第一项任务，进度就会在这里更新。";
+      }
+      document.getElementById("progressMessage").textContent = message;
+      document.getElementById("progressDetail").textContent = detail;
+    }
+
+    function renderMood() {
+      document.querySelectorAll(".mood-button").forEach(button => {
+        button.setAttribute("aria-pressed", String(button.dataset.mood === day.mood));
+      });
+      if (document.activeElement !== moodNote) {
+        moodNote.value = day.moodNote;
+      }
+    }
+
+    function render() {
+      renderTasks();
+      renderHabits();
+      renderProgress();
+      renderMood();
+    }
+
+    taskForm.addEventListener("submit", event => {
+      event.preventDefault();
+      const name = taskInput.value.trim();
+      if (!name) {
+        taskInput.focus();
+        return;
+      }
+
+      day.tasks.push({ id: createId(), name: name.slice(0, 80), done: false });
+      taskInput.value = "";
+      saveDay();
+      render();
+      taskInput.focus();
+    });
+
+    habitForm.addEventListener("submit", event => {
+      event.preventDefault();
+      const name = habitInput.value.trim();
+      if (!name) {
+        habitInput.focus();
+        return;
+      }
+      if (day.habits.some(habit => habit.name.toLocaleLowerCase() === name.toLocaleLowerCase())) {
+        setStatus("这个习惯已经在今天的清单里了。", "error");
+        habitInput.focus();
+        return;
+      }
+
+      day.habits.push({ id: createId(), name: name.slice(0, 40), icon: "✦", done: false });
+      habitInput.value = "";
+      saveDay();
+      render();
+      habitInput.focus();
+    });
+
+    document.querySelectorAll(".mood-button").forEach(button => {
+      button.addEventListener("click", () => {
+        day.mood = day.mood === button.dataset.mood ? null : button.dataset.mood;
+        saveDay();
+        renderMood();
+      });
+    });
+
+    moodNote.addEventListener("input", () => {
+      day.moodNote = moodNote.value.slice(0, 240);
+      saveDay();
+    });
+
+    document.getElementById("openClearDialog").addEventListener("click", () => {
+      clearDialog.showModal();
+    });
+
+    document.getElementById("cancelClear").addEventListener("click", () => {
+      clearDialog.close();
+    });
+
+    document.getElementById("confirmClear").addEventListener("click", () => {
+      day.tasks = [];
+      day.habits = day.habits.map(habit => ({ ...habit, done: false }));
+      day.mood = null;
+      day.moodNote = "";
+      clearDialog.close();
+      saveDay();
+      render();
+      setStatus("今日记录已清空，习惯已重置。", "success");
+    });
+
+    renderDate();
+    render();
+  </script>
+
+  <script src="lab-archive.js"></script>
+  <script>
+    (function () {
+      if (!window.InteractiveLab) return;
+
+      window.InteractiveLab.beginSession("life-os");
+
+      const taskForm = document.getElementById("taskForm");
+      if (taskForm) {
+        taskForm.addEventListener("submit", function () {
+          window.InteractiveLab.logEvent("life-os", "gesture", "添加一项今日任务");
+        });
+      }
+
+      const habitForm = document.getElementById("habitForm");
+      if (habitForm) {
+        habitForm.addEventListener("submit", function () {
+          window.InteractiveLab.logEvent("life-os", "gesture", "添加一个每日习惯");
+        });
+      }
+
+      document.querySelectorAll(".mood-button").forEach(function (button) {
+        button.addEventListener("click", function () {
+          window.InteractiveLab.logEvent(
+            "life-os",
+            "gesture",
+            "记录心情：" + button.getAttribute("aria-label")
+          );
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

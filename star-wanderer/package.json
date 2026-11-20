@@ -1,0 +1,9 @@
+{
+  "name": "star-wanderer",
+  "version": "1.0.0",
+  "private": true,
+  "description": "星际漫游 — 一面把表情和手势翻译成天气的情绪星云镜",
+  "scripts": {
+    "start": "node server.js"
+  }
+}

@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#07080d">
+<title>星际漫游 · 情绪星云镜</title>
+<meta name="description" content="星际漫游是一面情绪星云镜。你在前，星云在后。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%2307080d'/%3E%3Ccircle cx='32' cy='32' r='7' fill='%23e9d7ae'/%3E%3Ccircle cx='32' cy='32' r='17' fill='none' stroke='%23c9a86a' stroke-opacity='.55'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="./css/app.css">
+</head>
+<body>
+
+<svg class="svg-sprite" aria-hidden="true" focusable="false">
+  <symbol id="i-thumb-up" viewBox="0 0 24 24"><path d="M7 11v8a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1v-7a1 1 0 0 1 1 -1h3a4 4 0 0 0 4 -4v-1a2 2 0 0 1 4 0v5h3a2 2 0 0 1 2 2l-1 5a2 3 0 0 1 -2 2h-7a3 3 0 0 1 -3 -3"/></symbol>
+  <symbol id="i-thumb-down" viewBox="0 0 24 24"><path d="M7 13v-8a1 1 0 0 0 -1 -1h-2a1 1 0 0 0 -1 1v7a1 1 0 0 0 1 1h3a4 4 0 0 1 4 4v1a2 2 0 0 0 4 0v-5h3a2 2 0 0 0 2 -2l-1 -5a2 3 0 0 0 -2 -2h-7a3 3 0 0 0 -3 3"/></symbol>
+  <symbol id="i-two-fingers" viewBox="0 0 24 24"><path d="M8 13v-8.5a1.5 1.5 0 0 1 3 0v7.5"/><path d="M17 11.5a1.5 1.5 0 0 1 3 0v4.5a6 6 0 0 1 -6 6h-2h.208a6 6 0 0 1 -5.012 -2.7a69.74 69.74 0 0 1 -.196 -.3c-.312 -.479 -1.407 -2.388 -3.286 -5.728a1.5 1.5 0 0 1 .536 -2.022a1.867 1.867 0 0 1 2.28 .28l1.47 1.47"/><path d="M14 10.5a1.5 1.5 0 0 1 3 0v1.5"/><path d="M11 5.5v-2a1.5 1.5 0 1 1 3 0v8.5"/></symbol>
+  <symbol id="i-hand-finger" viewBox="0 0 24 24"><path d="M8 13v-8.5a1.5 1.5 0 0 1 3 0v7.5"/><path d="M11 11.5v-2a1.5 1.5 0 1 1 3 0v2.5"/><path d="M14 10.5a1.5 1.5 0 0 1 3 0v1.5"/><path d="M17 11.5a1.5 1.5 0 0 1 3 0v4.5a6 6 0 0 1 -6 6h-2h.208a6 6 0 0 1 -5.012 -2.7a69.74 69.74 0 0 1 -.196 -.3c-.312 -.479 -1.407 -2.388 -3.286 -5.728a1.5 1.5 0 0 1 .536 -2.022a1.867 1.867 0 0 1 2.28 .28l1.47 1.47"/></symbol>
+  <symbol id="i-hand-grab" viewBox="0 0 24 24"><path d="M8 11v-3.5a1.5 1.5 0 0 1 3 0v2.5"/><path d="M11 9.5v-3a1.5 1.5 0 0 1 3 0v3.5"/><path d="M14 7.5a1.5 1.5 0 0 1 3 0v2.5"/><path d="M17 9.5a1.5 1.5 0 0 1 3 0v4.5a6 6 0 0 1 -6 6h-2h.208a6 6 0 0 1 -5.012 -2.7l-.196 -.3c-.312 -.479 -1.407 -2.388 -3.286 -5.728a1.5 1.5 0 0 1 .536 -2.022a1.867 1.867 0 0 1 2.28 .28l1.47 1.47"/></symbol>
+  <symbol id="i-face" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8.5 10.2v.1M15.5 10.2v.1M8.6 14.4c.9 1.3 2.1 2 3.4 2s2.5-.7 3.4-2"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3l1.9 5.8L20 10l-5 3.7L16 20l-4-3.6L8 20l1-6.3L4 10l6.1-1.2z"/></symbol>
+  <symbol id="i-person" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.4"/><path d="M5.5 20c.4-3.3 2.8-5.4 6.5-5.4s6.1 2.1 6.5 5.4"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-archive" viewBox="0 0 24 24"><path d="M4 7h16v13H4zM3 4h18v3H3zM9.5 11h5"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v5M14 11v5"/></symbol>
+  <symbol id="i-palette" viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 0 0 18h1.5a1.5 1.5 0 0 0 0-3h-1a1.5 1.5 0 0 1 0-3H15a5 5 0 0 0 5-5c0-3.9-3.6-7-8-7z"/><circle cx="7.7" cy="10" r=".8"/><circle cx="10.3" cy="6.8" r=".8"/><circle cx="14.7" cy="6.8" r=".8"/></symbol>
+</svg>
+
+<div id="app" data-scene="intro">
+
+  <canvas id="stage" aria-label="情绪星云"></canvas>
+  <div class="grain" aria-hidden="true"></div>
+  <div class="ambient-vignette" aria-hidden="true"></div>
+
+  <!-- ───────────────────────── 开场 ───────────────────────── -->
+  <section class="scene scene-intro" id="scene-intro" aria-labelledby="intro-title">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span class="brand-cn">星际漫游</span>
+        <span class="brand-en">STAR WANDERER</span>
+      </div>
+      <div class="topbar-actions">
+        <button class="ghost-link" id="open-colors" type="button">
+          <svg class="icon"><use href="#i-palette"/></svg>
+          <span>情绪配色</span>
+          <span class="custom-dot" id="custom-dot" aria-hidden="true"></span>
+        </button>
+        <button class="ghost-link" id="open-archive" type="button">
+          <svg class="icon"><use href="#i-archive"/></svg>
+          <span>档案馆</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="intro-grid">
+      <div class="intro-copy">
+        <p class="eyebrow"><span class="rule"></span>情绪星云镜 · 一场三分钟的漫游</p>
+        <h1 id="intro-title">星际<br><em>漫游</em></h1>
+        <p class="intro-en">A NEBULA FOR HOW YOU FEEL</p>
+        <p class="lede">你在前，星云在后。<br>脸或手把你的情绪翻译成天气，<br>要不要留下记录，由你决定。</p>
+      </div>
+
+      <div class="intro-panel">
+        <div class="choice-block">
+          <div class="choice-head"><span>如何读取</span><span class="choice-no">01</span></div>
+          <div class="choice-row" role="group" aria-label="输入方式" id="input-choice">
+            <button class="choice is-selected" type="button" data-value="expression" aria-pressed="true">
+              <svg class="choice-icon"><use href="#i-face"/></svg>
+              <span class="choice-text"><b>用表情</b><small>读面部肌肉的微光</small></span>
+              <span class="choice-dot" aria-hidden="true"></span>
+            </button>
+            <button class="choice" type="button" data-value="gesture" aria-pressed="false">
+              <svg class="choice-icon"><use href="#i-thumb-up"/></svg>
+              <span class="choice-text"><b>用手势</b><small>五枚手势，五种天气</small></span>
+              <span class="choice-dot" aria-hidden="true"></span>
+            </button>
+          </div>
+        </div>
+
+        <div class="choice-block">
+          <div class="choice-head"><span>是否看见自己</span><span class="choice-no">02</span></div>
+          <div class="choice-row compact" role="group" aria-label="画面" id="presence-choice">
+            <button class="choice is-selected" type="button" data-value="self" aria-pressed="true">
+              <svg class="choice-icon"><use href="#i-person"/></svg>
+              <span class="choice-text"><b>看见自己</b><small>人与星云</small></span>
+              <span class="choice-dot" aria-hidden="true"></span>
+            </button>
+            <button class="choice" type="button" data-value="nebula" aria-pressed="false">
+              <svg class="choice-icon"><use href="#i-star"/></svg>
+              <span class="choice-text"><b>只看星云</b><small>把自己藏起来</small></span>
+              <span class="choice-dot" aria-hidden="true"></span>
+            </button>
+          </div>
+        </div>
+
+        <div class="intro-actions">
+          <button class="primary-btn" id="start-btn" type="button">
+            <span>开始漫游</span>
+            <svg class="icon"><use href="#i-arrow"/></svg>
+          </button>
+          <p class="micro">约 3 分钟 · 随时按 <kbd>Esc</kbd> 结束</p>
+        </div>
+
+        <p class="privacy-line">
+          <span class="privacy-dot" aria-hidden="true"></span>
+          画面只在本地计算，默认不留存、不上传。
+        </p>
+      </div>
+    </div>
+
+    <footer class="intro-foot">
+      <p>不是诊断，只是一次艺术化的读取。</p>
+      <p class="foot-mark">N 31°14′ · E 121°28′ · <span id="intro-clock">--:--</span></p>
+    </footer>
+  </section>
+
+  <!-- ───────────────────────── 准备 ───────────────────────── -->
+  <section class="scene scene-prepare is-hidden" id="scene-prepare" aria-labelledby="prep-title">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span class="brand-cn">星际漫游</span>
+        <span class="brand-en">STAR WANDERER</span>
+      </div>
+      <span class="scene-count">第 01 幕 · 准备</span>
+    </header>
+
+    <div class="prepare-stage">
+      <div class="prepare-ring" id="prepare-ring" aria-hidden="true">
+        <svg viewBox="0 0 200 200">
+          <circle class="ring-track" cx="100" cy="100" r="94"/>
+          <circle class="ring-progress" id="ring-progress" cx="100" cy="100" r="94"/>
+        </svg>
+        <span class="ring-label" id="ring-label">00</span>
+      </div>
+
+      <div class="prepare-copy">
+        <p class="eyebrow" id="prep-eyebrow"><span class="rule"></span>第 01 幕 · 准备</p>
+        <h2 id="prep-title">先安静三秒</h2>
+        <p class="prep-body" id="prep-body">放松肩膀，看向镜头，做一次中性的呼吸。<br>星云会记住这一刻的你。</p>
+        <p class="prep-status" id="prep-status"><span class="status-dot"></span>正在打开镜头</p>
+        <div class="prep-actions" id="prep-actions"></div>
+      </div>
+    </div>
+
+    <div class="prepare-guide" id="prepare-guide" hidden>
+      <p class="guide-title">把一只手放进画面</p>
+      <div class="gesture-list" id="gesture-list-prepare"></div>
+      <p class="guide-note">握紧拳头，保持一下，是焦虑的天气。</p>
+    </div>
+
+    <footer class="prepare-foot">
+      <p id="prep-foot">镜头只在这台设备上工作 · 不录视频、不录声音</p>
+      <button class="text-btn" id="prep-back" type="button">返回</button>
+    </footer>
+  </section>
+
+  <!-- ───────────────────────── 漫游 HUD ───────────────────────── -->
+  <div class="hud is-hidden" id="hud">
+    <div class="hud-top">
+      <div class="hud-left">
+        <span class="hud-mark" aria-hidden="true"></span>
+        <span class="hud-word">星际漫游</span>
+        <span class="hud-time" id="hud-time">00:00</span>
+      </div>
+      <div class="hud-controls">
+        <div class="seg-control" role="group" aria-label="切换输入方式">
+          <button type="button" data-mode="expression" class="is-active">表情</button>
+          <button type="button" data-mode="gesture">手势</button>
+        </div>
+        <button class="end-btn" id="end-btn" type="button"><span>结束漫游</span><span class="end-dot"></span></button>
+      </div>
+    </div>
+
+    <div class="hud-bottom">
+      <div class="feeling" id="feeling">
+        <p class="feeling-kicker">此刻 · <span id="feeling-mode">表情</span></p>
+        <p class="feeling-name"><span id="feeling-han">静</span><span class="feeling-poem" id="feeling-poem">未起风</span></p>
+        <div class="intensity"><span id="intensity-fill"></span></div>
+      </div>
+      <div class="hud-hints">
+        <span><kbd>M</kbd> 切换</span>
+        <span><kbd>Esc</kbd> 结束</span>
+        <span class="demo-tag" id="demo-tag" hidden>演示模式 · <kbd>1</kbd>–<kbd>5</kbd></span>
+      </div>
+    </div>
+
+    <div class="gesture-guide-session is-hidden" id="gesture-guide-session" aria-hidden="true" aria-label="手势提示">
+      <p class="session-guide-title"><span class="status-dot"></span>手势 · 五种天气</p>
+      <div class="gesture-list" id="gesture-list-session"></div>
+    </div>
+
+    <div class="mode-wash" id="mode-wash" aria-hidden="true"></div>
+    <div class="calibration-toast is-hidden" id="calibration-toast"><span class="status-dot"></span><span id="calibration-toast-text">重新校准表情 · 请保持中性</span></div>
+  </div>
+
+  <!-- ───────────────────────── 结束 · 情绪气象卡 ───────────────────────── -->
+  <div class="overlay end-overlay is-hidden" id="end-overlay">
+    <article class="weather-card" role="dialog" aria-modal="true" aria-labelledby="weather-title">
+      <header class="weather-head">
+        <div>
+          <p class="weather-kicker">情绪气象卡 · EMOTION WEATHER REPORT</p>
+          <p class="weather-meta" id="weather-meta">--</p>
+        </div>
+        <div class="weather-no">
+          <span>STAR WANDERER</span>
+          <b id="weather-no">NO. 0000</b>
+        </div>
+      </header>
+
+      <div class="weather-body">
+        <div class="weather-main">
+          <p class="weather-date" id="weather-date">--</p>
+          <h2 class="weather-title" id="weather-title"><span id="weather-han">静</span><em id="weather-poem">未起风</em></h2>
+          <p class="weather-sub" id="weather-sub">这一段漫游，星云很安静。</p>
+
+          <div class="weather-facts">
+            <div><span>时长</span><b id="fact-duration">00:00</b></div>
+            <div><span>输入</span><b id="fact-mode">表情</b></div>
+            <div><span>切换</span><b id="fact-switches">0 次</b></div>
+          </div>
+
+          <div class="spectrum-wrap">
+            <div class="spectrum-head"><span>五种情绪占比</span><span id="spectrum-total">--</span></div>
+            <div class="spectrum" id="spectrum"></div>
+            <div class="spectrum-legend" id="spectrum-legend"></div>
+          </div>
+
+          <div class="curve-wrap">
+            <div class="curve-head"><span>强度曲线</span><span id="curve-peak">峰值 --</span></div>
+            <svg class="curve" id="curve" viewBox="0 0 480 92" preserveAspectRatio="none" aria-label="情绪强度曲线"></svg>
+          </div>
+
+          <p class="weather-note">情绪记录里没有你的脸；截图只在你选择时保存。所有情绪都是艺术化的读取，不是诊断。</p>
+        </div>
+
+        <aside class="weather-side">
+          <div class="shot" id="shot" data-state="locked">
+            <div class="shot-placeholder">
+              <span class="shot-lock" aria-hidden="true"></span>
+              <p>所见即所得</p>
+              <small>选择「情绪记录 + 截图」后生成</small>
+            </div>
+            <img id="shot-img" alt="这次漫游的画面" hidden>
+            <span class="shot-caption">THIS MOMENT</span>
+          </div>
+
+          <div class="keep-options" role="radiogroup" aria-label="如何留下这一刻">
+            <p class="keep-title">这一刻，要留下什么？</p>
+            <button class="keep-option is-selected" type="button" data-keep="none" role="radio" aria-checked="true">
+              <span class="keep-radio" aria-hidden="true"></span>
+              <span><b>什么都不留</b><small>让这一刻只发生一次 · 默认</small></span>
+            </button>
+            <button class="keep-option" type="button" data-keep="record" role="radio" aria-checked="false">
+              <span class="keep-radio" aria-hidden="true"></span>
+              <span><b>只留情绪记录</b><small>时长、情绪与强度曲线</small></span>
+            </button>
+            <button class="keep-option" type="button" data-keep="both" role="radio" aria-checked="false">
+              <span class="keep-radio" aria-hidden="true"></span>
+              <span><b>情绪记录 + 截图</b><small>连这一刻的画面一起收好</small></span>
+            </button>
+            <p class="keep-note" id="keep-note" hidden>演示模式不会写入情绪记录；截图仍可保存。</p>
+          </div>
+
+          <div class="weather-actions">
+            <button class="paper-btn" id="keep-btn" type="button">离开</button>
+            <p class="paper-privacy">只保存在这台设备 · 不上传</p>
+          </div>
+        </aside>
+      </div>
+
+      <footer class="weather-foot">
+        <span>星际漫游 · 情绪星云镜</span>
+        <span id="weather-foot-mode">表情模式 / 画面只在本机计算</span>
+      </footer>
+    </article>
+  </div>
+
+  <!-- ───────────────────────── 档案馆 ───────────────────────── -->
+  <div class="overlay archive-overlay is-hidden" id="archive-overlay">
+    <section class="archive" role="dialog" aria-modal="true" aria-labelledby="archive-title">
+      <header class="archive-head">
+        <div>
+          <p class="eyebrow"><span class="rule"></span>ARCHIVE · 只在这台设备</p>
+          <h2 id="archive-title">档案馆</h2>
+          <p class="archive-sub">留在这里的天气。</p>
+        </div>
+        <button class="archive-close" id="archive-close" type="button" aria-label="关闭档案馆">
+          <svg class="icon"><use href="#i-close"/></svg>
+        </button>
+      </header>
+      <div class="archive-grid" id="archive-grid"></div>
+      <p class="archive-empty" id="archive-empty" hidden>还没有留下任何天气。<br><span>下一次漫游结束时，你可以选择收下它。</span></p>
+      <footer class="archive-foot">
+        <span id="archive-count">0 份记录</span>
+        <button class="text-btn" id="archive-clear" type="button" hidden>清空档案馆</button>
+      </footer>
+    </section>
+  </div>
+
+  <!-- ───────────────────────── 情绪配色 ───────────────────────── -->
+  <div class="overlay colors-overlay is-hidden" id="colors-overlay">
+    <section class="color-panel" role="dialog" aria-modal="true" aria-labelledby="colors-title">
+      <header class="color-head">
+        <div>
+          <p class="eyebrow"><span class="rule"></span>PERSONAL PALETTE · 本机</p>
+          <h2 id="colors-title">情绪配色</h2>
+          <p class="color-sub">给五种情绪各选一种颜色。星云会把它展开成一场天气。</p>
+        </div>
+        <button class="archive-close" id="colors-close" type="button" aria-label="关闭情绪配色">
+          <svg class="icon"><use href="#i-close"/></svg>
+        </button>
+      </header>
+
+      <div class="color-preview" id="color-preview" aria-hidden="true"></div>
+
+      <div class="color-list" id="color-list">
+        <label class="color-row" data-emotion="joy">
+          <span class="color-swatch"><input type="color" id="color-joy" value="#ff7eac" aria-label="选择喜悦的颜色"></span>
+          <span class="color-name"><b>喜</b><small>喜悦 · JOY</small></span>
+          <span class="color-value"><b id="hex-joy">#FF7EAC</b><small id="state-joy">默认</small></span>
+        </label>
+        <label class="color-row" data-emotion="anger">
+          <span class="color-swatch"><input type="color" id="color-anger" value="#ec3a2a" aria-label="选择愤怒的颜色"></span>
+          <span class="color-name"><b>怒</b><small>愤怒 · ANGER</small></span>
+          <span class="color-value"><b id="hex-anger">#EC3A2A</b><small id="state-anger">默认</small></span>
+        </label>
+        <label class="color-row" data-emotion="delight">
+          <span class="color-swatch"><input type="color" id="color-delight" value="#ffb82a" aria-label="选择快乐的颜色"></span>
+          <span class="color-name"><b>乐</b><small>快乐 · DELIGHT</small></span>
+          <span class="color-value"><b id="hex-delight">#FFB82A</b><small id="state-delight">默认</small></span>
+        </label>
+        <label class="color-row" data-emotion="sadness">
+          <span class="color-swatch"><input type="color" id="color-sadness" value="#3e9aff" aria-label="选择悲伤的颜色"></span>
+          <span class="color-name"><b>哀</b><small>悲伤 · GRIEF</small></span>
+          <span class="color-value"><b id="hex-sadness">#3E9AFF</b><small id="state-sadness">默认</small></span>
+        </label>
+        <label class="color-row" data-emotion="anxiety">
+          <span class="color-swatch"><input type="color" id="color-anxiety" value="#b256ff" aria-label="选择焦虑的颜色"></span>
+          <span class="color-name"><b>焦虑</b><small>焦虑 · ANXIETY</small></span>
+          <span class="color-value"><b id="hex-anxiety">#B256FF</b><small id="state-anxiety">默认</small></span>
+        </label>
+      </div>
+
+      <footer class="color-foot">
+        <p>不调整，就沿用原来的默认色。改动会记住，只保存在这台设备。</p>
+        <button class="text-btn" id="colors-reset" type="button">恢复默认</button>
+      </footer>
+
+      <div class="color-actions">
+        <button class="primary-btn" id="colors-done" type="button">
+          <span>完成</span>
+          <svg class="icon"><use href="#i-arrow"/></svg>
+        </button>
+      </div>
+    </section>
+  </div>
+
+  <!-- ───────────────────────── 暂停 · 镜头关闭 ───────────────────────── -->
+  <div class="overlay pause-overlay is-hidden" id="pause-overlay">
+    <div class="pause-card" role="dialog" aria-modal="true" aria-labelledby="pause-title">
+      <span class="pause-eye" aria-hidden="true"></span>
+      <h2 id="pause-title">镜头已关闭</h2>
+      <p>你离开了页面，星云也跟着停下来。<br>没有画面在后台运行。</p>
+      <button class="primary-btn" id="resume-btn" type="button"><span>继续漫游</span><svg class="icon"><use href="#i-arrow"/></svg></button>
+      <button class="text-btn" id="pause-end" type="button">结束这次漫游</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <video id="camera" playsinline muted autoplay aria-hidden="true"></video>
+</div>
+
+<script src="../lab-archive.js"></script>
+<script>
+  (function () {
+    if (!window.InteractiveLab) return;
+    const session = window.InteractiveLab.beginSession("cosmos");
+    window.addEventListener("star-wanderer:emotion", function (event) {
+      const detail = event.detail || {};
+      session.log("gesture", "识别到情绪 · " + (detail.name || detail.key || "未知"), {
+        emotion: detail.key,
+        mode: detail.mode
+      });
+    });
+    window.addEventListener("star-wanderer:story", function (event) {
+      const detail = event.detail || {};
+      session.log("archive", "情绪故事 · " + (detail.name || detail.key || "未知"), {
+        emotion: detail.key
+      });
+    });
+  })();
+</script>
+<script type="module" src="./js/main.js"></script>
+</body>
+</html>

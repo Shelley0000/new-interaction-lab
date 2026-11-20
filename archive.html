@@ -1,0 +1,3283 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f4ed">
+  <meta name="description" content="Interactive Lab 创作档案馆：本地保存作品配置、素材、版本与交互记录。">
+  <title>创作档案馆 | Interactive Lab</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='32' fill='%23262934'/%3E%3Ctext x='32' y='44' font-size='30' text-anchor='middle' fill='%23f7f1e5'%3E%E2%9C%B3%3C/text%3E%3C/svg%3E">
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f7f4ed;
+      --paper-2: #fcfaf5;
+      --paper-3: #f1ece2;
+      --ink: #26232b;
+      --ink-2: #4e4954;
+      --muted: #7c7682;
+      --line: rgba(38, 35, 43, .16);
+      --line-soft: rgba(38, 35, 43, .09);
+      --lavender: #b9a8d4;
+      --lavender-2: #8b74ad;
+      --lavender-wash: #e9e3f1;
+      --mist-2: #7294a8;
+      --green: #6f9b83;
+      --red: #a05753;
+      --serif: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, "Songti SC", "STSong", "SimSun", serif;
+      --sans: "Segoe UI", "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", sans-serif;
+      --mono: "Cascadia Mono", "Consolas", "SFMono-Regular", monospace;
+      --gutter: clamp(18px, 3.4vw, 52px);
+    }
+
+    * { box-sizing: border-box; }
+
+    [hidden] { display: none !important; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      background:
+        radial-gradient(52rem 36rem at 94% -8%, rgba(185, 168, 212, .24), transparent 60%),
+        radial-gradient(46rem 34rem at -8% 46%, rgba(181, 204, 217, .24), transparent 64%),
+        var(--paper);
+      color: var(--ink);
+      font-family: var(--sans);
+      font-size: 14px;
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body::before {
+      position: fixed;
+      z-index: 30;
+      inset: 0;
+      pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.34'/%3E%3C/svg%3E");
+      content: "";
+      mix-blend-mode: multiply;
+      opacity: .10;
+    }
+
+    ::selection { background: var(--lavender); color: #fff; }
+    a { color: inherit; }
+    img, svg { display: block; max-width: 100%; }
+    button, input, textarea, select { font: inherit; }
+
+    :focus-visible {
+      outline: 2px solid var(--lavender-2);
+      outline-offset: 3px;
+    }
+
+    .mono {
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0 0 16px;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: .17em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      width: 22px;
+      height: 1px;
+      background: currentColor;
+      content: "";
+      opacity: .65;
+    }
+
+    /* ---------- Header ---------- */
+
+    .archive-header {
+      position: sticky;
+      z-index: 20;
+      top: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 22px;
+      padding: 16px var(--gutter);
+      border-bottom: 1px solid var(--line-soft);
+      background: rgba(247, 244, 237, .88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      text-decoration: none;
+      flex: 0 0 auto;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 34px;
+      height: 34px;
+      place-items: center;
+      border: 1px solid var(--ink);
+      border-radius: 50%;
+      font-family: var(--serif);
+      font-size: 16px;
+      transition: transform .7s cubic-bezier(.2, .7, .2, 1);
+    }
+
+    .brand:hover .brand-mark { transform: rotate(90deg); }
+
+    .brand strong {
+      display: block;
+      font-family: var(--serif);
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: -.01em;
+      line-height: 1.2;
+    }
+
+    .brand small {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 8px;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+    }
+
+    .header-center {
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: .16em;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      flex: 0 0 auto;
+    }
+
+    .db-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 8px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .db-status i {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #c2a86a;
+      transition: background .3s;
+    }
+
+    .db-status.is-ready i { background: var(--green); }
+    .db-status.is-error i { background: var(--red); }
+
+    .back-link {
+      color: var(--ink-2);
+      font-size: 11px;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .back-link:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; }
+
+    .db-alert {
+      padding: 13px var(--gutter);
+      border-bottom: 1px solid rgba(160, 87, 83, .28);
+      background: #fbefee;
+      color: #7e4643;
+      font-size: 11.5px;
+      line-height: 1.8;
+    }
+
+    .db-alert code {
+      padding: 1px 5px;
+      background: rgba(255, 255, 255, .7);
+      font-family: var(--mono);
+      font-size: 10px;
+    }
+
+    /* ---------- Layout ---------- */
+
+    .archive-shell {
+      display: grid;
+      grid-template-columns: 292px minmax(0, 1fr);
+      align-items: start;
+      width: 100%;
+      max-width: 1520px;
+      margin: 0 auto;
+      padding: 0 var(--gutter);
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 67px;
+      padding: 34px 30px 48px 0;
+      border-right: 1px solid var(--line-soft);
+      min-height: calc(100vh - 67px);
+    }
+
+    .sidebar h1 {
+      margin: 0;
+      font-family: var(--serif);
+      font-size: 30px;
+      font-weight: 500;
+      letter-spacing: -.04em;
+      line-height: 1.1;
+    }
+
+    .sidebar-intro {
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-size: 11.5px;
+      line-height: 1.8;
+    }
+
+    .sidebar-actions { margin-top: 22px; }
+
+    .work-list {
+      display: grid;
+      gap: 3px;
+      margin: 26px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .work-item {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      width: 100%;
+      padding: 12px 11px;
+      border: 0;
+      border-radius: 9px;
+      background: transparent;
+      color: var(--ink);
+      text-align: left;
+      cursor: pointer;
+      transition: background .2s;
+    }
+
+    .work-item:hover { background: rgba(255, 255, 255, .55); }
+    .work-item.is-active { background: var(--lavender-wash); }
+
+    .work-item-no {
+      flex: 0 0 auto;
+      width: 18px;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 8.5px;
+      letter-spacing: .06em;
+    }
+
+    .work-item-main { flex: 1; min-width: 0; }
+
+    .work-item-main strong {
+      display: block;
+      overflow: hidden;
+      font-family: var(--serif);
+      font-size: 15px;
+      font-weight: 500;
+      letter-spacing: -.01em;
+      line-height: 1.35;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .work-item-main small {
+      display: block;
+      overflow: hidden;
+      margin-top: 2px;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 7.5px;
+      letter-spacing: .08em;
+      text-overflow: ellipsis;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .work-dot {
+      width: 6px;
+      height: 6px;
+      flex: 0 0 auto;
+      border: 1px solid var(--accent, var(--lavender-2));
+      border-radius: 50%;
+      background: var(--accent, var(--lavender-2));
+    }
+
+    .work-dot.is-progress { background: transparent; }
+
+    .sidebar-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 26px;
+      padding-top: 20px;
+      border-top: 1px solid var(--line-soft);
+    }
+
+    .sidebar-stat { min-width: 0; }
+
+    .sidebar-stat strong {
+      display: block;
+      font-family: var(--serif);
+      font-size: 20px;
+      font-weight: 500;
+      letter-spacing: -.03em;
+      line-height: 1.1;
+    }
+
+    .sidebar-stat span {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 7.5px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .sidebar-note {
+      margin: 22px 0 0;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.8;
+    }
+
+    .workspace {
+      min-width: 0;
+      padding: 34px 0 90px 38px;
+    }
+
+    .empty-workspace {
+      display: grid;
+      min-height: 60vh;
+      place-items: center;
+      text-align: center;
+    }
+
+    .empty-workspace h2 {
+      margin: 0;
+      font-family: var(--serif);
+      font-size: 34px;
+      font-weight: 500;
+      letter-spacing: -.04em;
+    }
+
+    .empty-workspace p {
+      max-width: 38ch;
+      margin: 12px auto 22px;
+      color: var(--muted);
+      font-size: 12.5px;
+      line-height: 1.9;
+    }
+
+    /* ---------- Work header ---------- */
+
+    .work-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 28px;
+      padding-bottom: 26px;
+      border-bottom: 1px solid var(--ink);
+    }
+
+    .work-kicker {
+      margin: 0 0 10px;
+      color: var(--lavender-2);
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+
+    .work-title-block h2 {
+      margin: 0;
+      font-family: var(--serif);
+      font-size: clamp(34px, 4.2vw, 52px);
+      font-weight: 500;
+      letter-spacing: -.05em;
+      line-height: 1.05;
+    }
+
+    .work-description {
+      max-width: 58ch;
+      margin: 11px 0 0;
+      color: var(--ink-2);
+      font-size: 12.5px;
+      line-height: 1.85;
+    }
+
+    .work-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 7px;
+      flex: 0 0 auto;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      min-height: 37px;
+      padding: 0 14px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .55);
+      color: var(--ink-2);
+      font-size: 10.5px;
+      letter-spacing: .02em;
+      text-decoration: none;
+      cursor: pointer;
+      transition: border-color .2s, color .2s, background .2s, transform .2s;
+      white-space: nowrap;
+    }
+
+    .btn:hover {
+      border-color: var(--ink);
+      background: #fff;
+      color: var(--ink);
+      transform: translateY(-1px);
+    }
+
+    .btn:disabled {
+      opacity: .5;
+      cursor: wait;
+      transform: none;
+    }
+
+    .btn.primary {
+      border-color: var(--ink);
+      background: var(--ink);
+      color: var(--paper-2);
+    }
+
+    .btn.primary:hover { background: #3a3542; color: #fff; }
+
+    .btn.danger {
+      border-color: rgba(160, 87, 83, .35);
+      color: var(--red);
+    }
+
+    .btn.danger:hover {
+      border-color: var(--red);
+      background: #fbefee;
+      color: var(--red);
+    }
+
+    .btn.small {
+      min-height: 29px;
+      padding: 0 10px;
+      font-size: 9.5px;
+    }
+
+    .btn.ghost { background: transparent; }
+
+    /* ---------- Stats ---------- */
+
+    .work-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 11px;
+      margin: 24px 0 26px;
+    }
+
+    .stat {
+      min-width: 0;
+      padding: 15px 17px;
+      border: 1px solid var(--line-soft);
+      background: rgba(255, 255, 255, .38);
+    }
+
+    .stat span {
+      display: block;
+      overflow: hidden;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 7.5px;
+      letter-spacing: .1em;
+      text-overflow: ellipsis;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .stat strong {
+      display: block;
+      margin-top: 8px;
+      overflow: hidden;
+      font-family: var(--serif);
+      font-size: clamp(19px, 2.1vw, 26px);
+      font-weight: 500;
+      letter-spacing: -.03em;
+      line-height: 1.1;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .stat small {
+      display: block;
+      margin-top: 5px;
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 9.5px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* ---------- Tabs ---------- */
+
+    .tabs {
+      display: flex;
+      gap: 3px;
+      overflow-x: auto;
+      border-bottom: 1px solid var(--line);
+      scrollbar-width: none;
+    }
+
+    .tabs::-webkit-scrollbar { display: none; }
+
+    .tab {
+      margin-bottom: -1px;
+      padding: 11px 13px;
+      border: 0;
+      border-bottom: 2px solid transparent;
+      background: none;
+      color: var(--muted);
+      font-size: 11px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: color .2s, border-color .2s;
+    }
+
+    .tab:hover { color: var(--ink); }
+
+    .tab.is-active {
+      border-bottom-color: var(--ink);
+      color: var(--ink);
+    }
+
+    .tab-panel { padding-top: 26px; }
+
+    .panel-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 22px;
+      margin-bottom: 18px;
+    }
+
+    .panel-head h3,
+    .panel-block h3 {
+      margin: 0;
+      font-family: var(--serif);
+      font-size: 20px;
+      font-weight: 500;
+      letter-spacing: -.02em;
+    }
+
+    .panel-head p {
+      max-width: 62ch;
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.8;
+    }
+
+    /* ---------- Overview ---------- */
+
+    .overview-columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .panel-block {
+      min-width: 0;
+      padding: 20px;
+      border: 1px solid var(--line-soft);
+      background: rgba(255, 255, 255, .34);
+    }
+
+    .block-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .mini-events {
+      display: grid;
+      gap: 0;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      border-top: 1px solid var(--line-soft);
+    }
+
+    .mini-events li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--line-soft);
+    }
+
+    .mini-events li > span {
+      flex: 0 0 47px;
+      padding-top: 2px;
+      color: var(--lavender-2);
+      font-family: var(--mono);
+      font-size: 7.5px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .mini-events strong {
+      display: block;
+      color: var(--ink-2);
+      font-size: 11.5px;
+      font-weight: 500;
+      line-height: 1.6;
+    }
+
+    .mini-events small {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 8px;
+      letter-spacing: .03em;
+    }
+
+    .empty-inline {
+      margin: 0;
+      padding: 18px 0;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.8;
+    }
+
+    .mini-json {
+      max-height: 246px;
+      margin: 0;
+      padding: 12px 14px;
+      overflow: auto;
+      border: 1px solid var(--line-soft);
+      background: rgba(255, 255, 255, .62);
+      color: var(--ink-2);
+      font-family: var(--mono);
+      font-size: 10px;
+      line-height: 1.65;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .block-note {
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.75;
+    }
+
+    .workspace .panel-block + .panel-block,
+    .workspace .overview-columns + .panel-block {
+      margin-top: 18px;
+    }
+
+    .meta-list {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin: 16px 0 0;
+    }
+
+    .meta-list div { min-width: 0; }
+
+    .meta-list dt {
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 7.5px;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+    }
+
+    .meta-list dd {
+      overflow: hidden;
+      margin: 4px 0 0;
+      color: var(--ink-2);
+      font-size: 11px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* ---------- Config ---------- */
+
+    .config-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-bottom: 12px;
+    }
+
+    .json-editor {
+      display: block;
+      width: 100%;
+      min-height: 350px;
+      padding: 16px 18px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: 1px;
+      outline: 0;
+      background: var(--paper-2);
+      color: var(--ink);
+      font-family: var(--mono);
+      font-size: 11.5px;
+      line-height: 1.75;
+      tab-size: 2;
+      transition: border-color .2s, box-shadow .2s;
+    }
+
+    .json-editor:focus {
+      border-color: var(--lavender-2);
+      box-shadow: 0 0 0 3px rgba(139, 116, 173, .12);
+    }
+
+    .config-status {
+      min-height: 20px;
+      margin: 9px 0 0;
+      color: var(--muted);
+      font-size: 10.5px;
+    }
+
+    .config-status[data-kind="error"] { color: var(--red); }
+    .config-status[data-kind="success"] { color: #5f866d; }
+
+    .hint-box {
+      margin-top: 18px;
+      padding: 14px 16px;
+      border-left: 2px solid var(--lavender);
+      background: rgba(233, 227, 241, .40);
+      color: var(--ink-2);
+      font-size: 11px;
+      line-height: 1.85;
+    }
+
+    .hint-box code {
+      padding: 1px 5px;
+      background: rgba(255, 255, 255, .72);
+      font-family: var(--mono);
+      font-size: 10px;
+    }
+
+    /* ---------- Assets ---------- */
+
+    .dropzone {
+      display: grid;
+      place-items: center;
+      gap: 7px;
+      padding: 34px 20px;
+      border: 1px dashed var(--line);
+      background: rgba(255, 255, 255, .30);
+      text-align: center;
+      cursor: pointer;
+      transition: background .2s, border-color .2s;
+    }
+
+    .dropzone:hover,
+    .dropzone.is-drag {
+      border-color: var(--lavender-2);
+      background: rgba(233, 227, 241, .42);
+    }
+
+    .dropzone-icon {
+      color: var(--lavender-2);
+      font-family: var(--serif);
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .dropzone strong {
+      font-family: var(--serif);
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    .dropzone small {
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .upload-status {
+      min-height: 18px;
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .asset-list {
+      display: grid;
+      gap: 9px;
+      margin-top: 18px;
+    }
+
+    .asset-card {
+      display: grid;
+      grid-template-columns: 80px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 14px;
+      padding: 11px;
+      border: 1px solid var(--line-soft);
+      background: rgba(255, 255, 255, .38);
+    }
+
+    .asset-preview {
+      display: grid;
+      width: 80px;
+      height: 60px;
+      place-items: center;
+      overflow: hidden;
+      border: 1px solid var(--line-soft);
+      background: var(--paper-3);
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: .06em;
+    }
+
+    .asset-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .asset-preview audio,
+    .asset-preview video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .asset-meta { min-width: 0; }
+
+    .asset-meta strong {
+      display: block;
+      overflow: hidden;
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 600;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .asset-meta small {
+      display: block;
+      overflow: hidden;
+      margin-top: 3px;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 8px;
+      letter-spacing: .03em;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .asset-meta audio {
+      width: 100%;
+      height: 30px;
+      margin-top: 7px;
+    }
+
+    .asset-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .empty-note {
+      margin: 18px 0 0;
+      padding: 30px 20px;
+      border: 1px dashed var(--line);
+      background: rgba(255, 255, 255, .22);
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.85;
+      text-align: center;
+    }
+
+    /* ---------- Versions ---------- */
+
+    .version-list {
+      display: grid;
+      gap: 7px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .version-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 12px 15px;
+      border: 1px solid var(--line-soft);
+      background: rgba(255, 255, 255, .38);
+    }
+
+    .version-main { flex: 1; min-width: 0; }
+
+    .version-main strong {
+      display: block;
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .version-main small {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 8px;
+      letter-spacing: .04em;
+    }
+
+    .version-actions {
+      display: flex;
+      gap: 5px;
+      flex: 0 0 auto;
+    }
+
+    /* ---------- Events ---------- */
+
+    .event-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 6px;
+    }
+
+    .event-toolbar select {
+      min-height: 29px;
+      padding: 0 9px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .55);
+      color: var(--ink-2);
+      font-size: 9.5px;
+    }
+
+    .event-summary {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-bottom: 14px;
+    }
+
+    .event-summary span {
+      padding: 5px 10px;
+      border: 1px solid var(--line-soft);
+      background: rgba(255, 255, 255, .36);
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 8px;
+      letter-spacing: .04em;
+    }
+
+    .event-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      border-top: 1px solid var(--line-soft);
+    }
+
+    .event-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 13px;
+      padding: 12px 3px;
+      border-bottom: 1px solid var(--line-soft);
+    }
+
+    .event-chip {
+      flex: 0 0 52px;
+      padding-top: 2px;
+      color: var(--lavender-2);
+      font-family: var(--mono);
+      font-size: 7.5px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .event-copy { flex: 1; min-width: 0; }
+
+    .event-copy strong {
+      display: block;
+      color: var(--ink-2);
+      font-size: 11.5px;
+      font-weight: 500;
+      line-height: 1.6;
+    }
+
+    .event-copy small {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 8px;
+      letter-spacing: .03em;
+    }
+
+    .list-footnote {
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-size: 9.5px;
+    }
+
+    /* ---------- Backup ---------- */
+
+    .backup-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .backup-card {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      padding: 19px;
+      border: 1px solid var(--line-soft);
+      background: rgba(255, 255, 255, .36);
+    }
+
+    .backup-card h3 {
+      margin: 0;
+      font-family: var(--serif);
+      font-size: 18px;
+      font-weight: 500;
+    }
+
+    .backup-card p {
+      flex: 1;
+      margin: 0;
+      color: var(--muted);
+      font-size: 10.5px;
+      line-height: 1.8;
+    }
+
+    .backup-card .btn { align-self: flex-start; }
+
+    .backup-note {
+      margin-top: 18px;
+      padding-top: 14px;
+      border-top: 1px solid var(--line-soft);
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.85;
+    }
+
+    .backup-note code {
+      font-family: var(--mono);
+      font-size: 9px;
+      background: rgba(255, 255, 255, .6);
+      padding: 1px 4px;
+    }
+
+    /* ---------- Dialogs ---------- */
+
+    dialog {
+      width: min(560px, calc(100% - 30px));
+      max-height: calc(100vh - 48px);
+      padding: 0;
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 2px;
+      background: var(--paper-2);
+      color: var(--ink);
+      box-shadow: 0 34px 100px rgba(38, 35, 43, .26);
+    }
+
+    dialog::backdrop {
+      background: rgba(38, 35, 43, .30);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+
+    .modal-card { padding: 27px; }
+
+    .modal-card h2 {
+      margin: 0;
+      font-family: var(--serif);
+      font-size: 27px;
+      font-weight: 500;
+      letter-spacing: -.035em;
+      line-height: 1.15;
+    }
+
+    .modal-card > p {
+      margin: 11px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.85;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 7px;
+      margin-top: 24px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 13px;
+      margin-top: 20px;
+    }
+
+    .form-grid label {
+      display: block;
+      color: var(--ink-2);
+      font-size: 10.5px;
+    }
+
+    .form-grid label.full { grid-column: 1 / -1; }
+
+    .form-grid input,
+    .form-grid select,
+    .form-grid textarea {
+      display: block;
+      width: 100%;
+      margin-top: 6px;
+      padding: 9px 11px;
+      border: 1px solid var(--line);
+      border-radius: 1px;
+      outline: 0;
+      background: #fff;
+      color: var(--ink);
+      font-size: 12px;
+      transition: border-color .2s, box-shadow .2s;
+    }
+
+    .form-grid textarea { min-height: 74px; resize: vertical; line-height: 1.65; }
+
+    .form-grid input:focus,
+    .form-grid select:focus,
+    .form-grid textarea:focus {
+      border-color: var(--lavender-2);
+      box-shadow: 0 0 0 3px rgba(139, 116, 173, .12);
+    }
+
+    .form-grid input[type="color"] {
+      height: 38px;
+      padding: 4px;
+      cursor: pointer;
+    }
+
+    .form-note {
+      min-height: 16px;
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.7;
+    }
+
+    .form-note[data-kind="error"] { color: var(--red); }
+
+    .import-summary {
+      margin-top: 16px;
+      padding: 12px 14px;
+      border: 1px solid var(--line-soft);
+      background: rgba(255, 255, 255, .6);
+      color: var(--ink-2);
+      font-size: 11px;
+      line-height: 1.8;
+    }
+
+    .import-list {
+      margin: 12px 0 0;
+      padding: 0;
+      list-style: none;
+      max-height: 150px;
+      overflow: auto;
+    }
+
+    .import-list li {
+      padding: 5px 0;
+      border-bottom: 1px solid var(--line-soft);
+      color: var(--muted);
+      font-size: 10.5px;
+    }
+
+    .check-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-top: 18px;
+      color: var(--ink-2);
+      font-size: 11px;
+      line-height: 1.7;
+      cursor: pointer;
+    }
+
+    .check-row input {
+      width: 15px;
+      height: 15px;
+      margin: 2px 0 0;
+      accent-color: var(--lavender-2);
+    }
+
+    .version-json {
+      max-height: 48vh;
+      margin: 16px 0 0;
+      padding: 14px;
+      overflow: auto;
+      border: 1px solid var(--line-soft);
+      background: #fff;
+      color: var(--ink-2);
+      font-family: var(--mono);
+      font-size: 10.5px;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    /* ---------- Toast ---------- */
+
+    .toast {
+      position: fixed;
+      z-index: 100;
+      bottom: 26px;
+      left: 50%;
+      max-width: calc(100% - 32px);
+      padding: 11px 19px;
+      border-radius: 999px;
+      background: var(--ink);
+      color: var(--paper);
+      font-size: 11px;
+      line-height: 1.5;
+      opacity: 0;
+      pointer-events: none;
+      transform: translate(-50%, 18px);
+      transition: opacity .3s, transform .3s;
+      box-shadow: 0 18px 42px rgba(38, 35, 43, .22);
+    }
+
+    .toast.is-visible {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
+    .toast[data-kind="error"] { background: #8f4f4b; }
+
+    /* ---------- Responsive ---------- */
+
+    @media (max-width: 1120px) {
+      .archive-shell { grid-template-columns: 244px minmax(0, 1fr); }
+      .workspace { padding-left: 28px; }
+      .work-stats { grid-template-columns: 1fr 1fr; }
+      .backup-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 900px) {
+      .header-center { display: none; }
+      .archive-shell { grid-template-columns: 1fr; }
+      .sidebar {
+        position: static;
+        min-height: 0;
+        padding: 26px 0 20px;
+        border-right: 0;
+        border-bottom: 1px solid var(--line-soft);
+      }
+      .work-list {
+        display: flex;
+        gap: 6px;
+        margin-top: 18px;
+        overflow-x: auto;
+        padding-bottom: 4px;
+        scrollbar-width: thin;
+      }
+      .work-list li { flex: 0 0 auto; }
+      .work-item {
+        width: auto;
+        min-width: 164px;
+        border: 1px solid var(--line-soft);
+        background: rgba(255, 255, 255, .3);
+      }
+      .work-item.is-active { border-color: transparent; }
+      .sidebar-stats { grid-template-columns: repeat(4, 1fr); margin-top: 18px; }
+      .sidebar-note { margin-top: 14px; }
+      .workspace { padding: 26px 0 70px; }
+    }
+
+    @media (max-width: 700px) {
+      .archive-header { padding-top: 12px; padding-bottom: 12px; }
+      .brand small { display: none; }
+      .header-right { gap: 12px; }
+      .db-status { font-size: 7.5px; }
+      .db-status span { display: none; }
+      .work-header { flex-direction: column; gap: 18px; }
+      .work-actions { justify-content: flex-start; }
+      .overview-columns { grid-template-columns: 1fr; }
+      .meta-list { grid-template-columns: 1fr 1fr; }
+      .panel-head { flex-direction: column; gap: 12px; }
+      .event-toolbar { justify-content: flex-start; }
+      .form-grid { grid-template-columns: 1fr; }
+      .asset-card { grid-template-columns: 64px minmax(0, 1fr); }
+      .asset-preview { width: 64px; height: 52px; }
+      .asset-actions { grid-column: 1 / -1; flex-direction: row; justify-content: flex-end; }
+      .version-row { align-items: flex-start; flex-direction: column; gap: 9px; }
+      .version-actions { width: 100%; justify-content: flex-end; }
+      .sidebar-stats { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+        animation-duration: .01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="archive-header">
+    <a class="brand" href="index.html" aria-label="返回 Interactive Lab 首页">
+      <span class="brand-mark" aria-hidden="true">✳</span>
+      <span>
+        <strong>Interactive Lab</strong>
+        <small>Archive</small>
+      </span>
+    </a>
+    <span class="header-center">创作档案馆 · The Archive</span>
+    <div class="header-right">
+      <span class="db-status" id="dbStatus"><i aria-hidden="true"></i><span id="dbStatusText">正在连接</span></span>
+      <a class="back-link" href="index.html">← 返回实验室</a>
+    </div>
+  </header>
+
+  <div class="db-alert" id="dbAlert" hidden>
+    <strong>本地档案馆暂时无法打开。</strong>
+    如果这是直接双击 HTML 文件打开的，浏览器可能限制了 IndexedDB。请在项目文件夹中启动一个本地服务器，例如运行
+    <code>python -m http.server 8000</code>，然后打开 <code>http://localhost:8000/archive.html</code>。
+  </div>
+
+  <div class="archive-shell">
+    <aside class="sidebar" aria-label="作品列表">
+      <p class="eyebrow">Catalog</p>
+      <h1>创作档案馆</h1>
+      <p class="sidebar-intro">配置、素材、版本与交互记录，一起收在这台设备里。</p>
+      <div class="sidebar-actions">
+        <button class="btn primary" id="newWorkBtn" type="button">＋ 新建作品</button>
+      </div>
+      <ul class="work-list" id="workList"></ul>
+      <div class="sidebar-stats" id="sidebarStats"></div>
+      <p class="sidebar-note">数据使用 IndexedDB 保存在当前浏览器中。换浏览器或清除站点数据前，记得先导出备份。</p>
+    </aside>
+
+    <section class="workspace" aria-label="作品档案">
+      <div class="empty-workspace" id="emptyWorkspace" hidden>
+        <div>
+          <h2>还没有作品。</h2>
+          <p>先新建一件作品，或者回到主站看看已经开放的小世界。</p>
+          <button class="btn primary" id="emptyNewWorkBtn" type="button">＋ 新建作品</button>
+        </div>
+      </div>
+
+      <div class="work-view" id="workView" hidden>
+        <header class="work-header">
+          <div class="work-title-block">
+            <p class="work-kicker" id="workKicker">WORK</p>
+            <h2 id="workTitle">作品</h2>
+            <p class="work-description" id="workDescription"></p>
+          </div>
+          <div class="work-actions">
+            <a class="btn" id="openWorkLink" href="#" target="_blank" rel="noopener">打开作品 ↗</a>
+            <button class="btn ghost" id="editWorkBtn" type="button">编辑资料</button>
+            <button class="btn danger" id="deleteWorkBtn" type="button">删除</button>
+          </div>
+        </header>
+
+        <div class="work-stats" id="workStats"></div>
+
+        <nav class="tabs" role="tablist" aria-label="作品档案分区">
+          <button class="tab is-active" type="button" role="tab" aria-selected="true" data-tab="overview">概览</button>
+          <button class="tab" type="button" role="tab" aria-selected="false" data-tab="config">配置</button>
+          <button class="tab" type="button" role="tab" aria-selected="false" data-tab="assets">素材</button>
+          <button class="tab" type="button" role="tab" aria-selected="false" data-tab="versions">版本</button>
+          <button class="tab" type="button" role="tab" aria-selected="false" data-tab="events">交互记录</button>
+          <button class="tab" type="button" role="tab" aria-selected="false" data-tab="backup">导出 / 恢复</button>
+        </nav>
+
+        <section class="tab-panel" id="panel-overview" role="tabpanel" aria-label="概览">
+          <div id="overviewContent"></div>
+        </section>
+
+        <section class="tab-panel" id="panel-config" role="tabpanel" aria-label="配置" hidden>
+          <div class="panel-head">
+            <div>
+              <h3>作品配置</h3>
+              <p>以 JSON 保存每个作品自己的设置。点击保存时，会顺便留下一个可恢复的版本快照。</p>
+            </div>
+          </div>
+          <div class="config-toolbar">
+            <button class="btn primary" id="saveConfigBtn" type="button">保存并生成版本</button>
+            <button class="btn" id="formatConfigBtn" type="button">格式化 JSON</button>
+            <button class="btn" id="revertConfigBtn" type="button">撤销未保存更改</button>
+            <button class="btn" id="exportConfigBtn" type="button">导出配置 JSON ↓</button>
+            <button class="btn" id="importConfigBtn" type="button">从 JSON 载入…</button>
+          </div>
+          <label class="mono" for="configEditor" style="display:block;margin-bottom:7px;color:var(--muted);">Config / JSON</label>
+          <textarea class="json-editor" id="configEditor" spellcheck="false" aria-label="作品配置 JSON"></textarea>
+          <p class="config-status" id="configStatus" role="status" aria-live="polite"></p>
+          <div class="hint-box">
+            新版「圣诞树」会把它自己的文字、字体、颜色与粒子密度同步到这里，并使用
+            <code>line1</code>、<code>line2</code>、<code>fontKey</code>、<code>fontSize</code>、<code>color</code>、<code>treeParticles</code> 和 <code>dustParticles</code>。
+            在这里恢复配置后，回到作品左侧点击「读取档案馆设置」即可应用。
+          </div>
+        </section>
+
+        <section class="tab-panel" id="panel-assets" role="tabpanel" aria-label="素材" hidden>
+          <div class="panel-head">
+            <div>
+              <h3>素材仓库</h3>
+              <p>照片、音乐、视频或其他文件都会保存在这台设备的 IndexedDB 中，并按作品归档。</p>
+            </div>
+            <button class="btn" id="assetPickBtn" type="button">＋ 上传素材</button>
+          </div>
+          <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="选择或拖入素材文件">
+            <span class="dropzone-icon" aria-hidden="true">＋</span>
+            <strong>拖进来，或点击选择文件</strong>
+            <small>图片、音频、视频、PDF、代码文件……不限格式</small>
+          </div>
+          <p class="upload-status" id="uploadStatus" role="status" aria-live="polite"></p>
+          <div class="asset-list" id="assetList"></div>
+        </section>
+
+        <section class="tab-panel" id="panel-versions" role="tabpanel" aria-label="版本" hidden>
+          <div class="panel-head">
+            <div>
+              <h3>配置版本</h3>
+              <p>每次保存配置、恢复旧版本之前，都会自动留下一个快照。恢复只会改变配置，不会删除素材。</p>
+            </div>
+          </div>
+          <ul class="version-list" id="versionList"></ul>
+        </section>
+
+        <section class="tab-panel" id="panel-events" role="tabpanel" aria-label="交互记录" hidden>
+          <div class="panel-head">
+            <div>
+              <h3>交互时间线</h3>
+              <p>作品打开、手势、许愿、设置变化和体验时长，都会通过共享脚本写进这里。</p>
+            </div>
+            <div class="event-toolbar">
+              <select id="eventFilter" aria-label="筛选交互记录类型">
+                <option value="all">全部记录</option>
+                <option value="gesture">手势</option>
+                <option value="wish">许愿</option>
+                <option value="setting">设置</option>
+                <option value="session">会话</option>
+                <option value="config">配置</option>
+                <option value="launch">打开</option>
+              </select>
+              <button class="btn small" id="refreshEventsBtn" type="button">刷新</button>
+              <button class="btn small danger" id="clearEventsBtn" type="button">清空</button>
+            </div>
+          </div>
+          <div class="event-summary" id="eventSummary"></div>
+          <ul class="event-list" id="eventList"></ul>
+          <p class="list-footnote" id="eventFootnote"></p>
+        </section>
+
+        <section class="tab-panel" id="panel-backup" role="tabpanel" aria-label="导出与恢复" hidden>
+          <div class="panel-head">
+            <div>
+              <h3>导出与恢复</h3>
+              <p>档案馆的完整备份是一个 JSON 文件，里面包含配置、版本、交互记录和素材本身。</p>
+            </div>
+          </div>
+          <div class="backup-grid">
+            <article class="backup-card">
+              <h3>完整档案馆</h3>
+              <p>所有作品的配置、版本、素材和交互记录，打包成一份可迁移的 JSON 备份。</p>
+              <button class="btn primary" id="exportAllBtn" type="button">导出完整档案馆 ↓</button>
+            </article>
+            <article class="backup-card">
+              <h3>当前作品</h3>
+              <p id="exportWorkDescription">只导出当前作品的配置、素材与交互记录。</p>
+              <button class="btn" id="exportWorkBtn" type="button">导出此作品 ↓</button>
+            </article>
+            <article class="backup-card">
+              <h3>导入 / 恢复</h3>
+              <p>读取之前导出的 JSON。可以选择与现有档案合并，或清空后覆盖恢复。</p>
+              <button class="btn" id="importArchiveBtn" type="button">选择 JSON 文件…</button>
+            </article>
+          </div>
+          <div class="backup-note">
+            素材会以 Base64 形式写入 JSON，文件可能比较大。建议定期导出，并放在自己信任的位置。
+            未来接入云端同步时，这份 JSON 结构可以直接作为迁移格式。
+          </div>
+        </section>
+      </div>
+    </section>
+  </div>
+
+  <dialog id="workDialog" aria-labelledby="workDialogTitle">
+    <div class="modal-card">
+      <p class="eyebrow">New / Edit Work</p>
+      <h2 id="workDialogTitle">新建作品</h2>
+      <form id="workForm">
+        <div class="form-grid">
+          <label>作品名称
+            <input id="fieldTitle" maxlength="60" required autocomplete="off" placeholder="例如：潮汐来信">
+          </label>
+          <label>英文名 / 副标题
+            <input id="fieldEn" maxlength="80" autocomplete="off" placeholder="Tide Letters">
+          </label>
+          <label>入口文件
+            <input id="fieldEntry" maxlength="120" autocomplete="off" placeholder="my-work.html">
+          </label>
+          <label>状态
+            <select id="fieldStatus">
+              <option value="live">已开放</option>
+              <option value="progress">制作中</option>
+            </select>
+          </label>
+          <label class="full">一句话描述
+            <textarea id="fieldDescription" maxlength="240" placeholder="这件作品想让人感受到什么？"></textarea>
+          </label>
+          <label>主色
+            <input id="fieldAccent" type="color" value="#b9a8d4">
+          </label>
+        </div>
+        <p class="form-note" id="workFormNote">入口文件需要和主站放在同一个文件夹中；也可以稍后再补。</p>
+        <div class="modal-actions">
+          <button class="btn" id="workFormCancel" type="button">取消</button>
+          <button class="btn primary" id="workFormSubmit" type="submit">创建作品</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <dialog id="confirmDialog" aria-labelledby="confirmTitle">
+    <div class="modal-card">
+      <p class="eyebrow">Please Confirm</p>
+      <h2 id="confirmTitle">确认操作</h2>
+      <p id="confirmText"></p>
+      <div class="modal-actions">
+        <button class="btn" id="confirmCancel" type="button">取消</button>
+        <button class="btn danger" id="confirmOk" type="button">确认</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="versionDialog" aria-labelledby="versionDialogTitle">
+    <div class="modal-card">
+      <p class="eyebrow">Version Snapshot</p>
+      <h2 id="versionDialogTitle">版本内容</h2>
+      <pre class="version-json" id="versionJson"></pre>
+      <div class="modal-actions">
+        <button class="btn" id="versionCloseBtn" type="button">关闭</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="importDialog" aria-labelledby="importDialogTitle">
+    <div class="modal-card">
+      <p class="eyebrow">Import Archive</p>
+      <h2 id="importDialogTitle">导入档案备份</h2>
+      <p>请确认这份备份的内容，然后选择合并或覆盖。</p>
+      <div class="import-summary" id="importSummary"></div>
+      <ul class="import-list" id="importList"></ul>
+      <label class="check-row">
+        <input id="importReplace" type="checkbox">
+        <span>覆盖现有档案：先清空当前浏览器里的全部作品、素材、版本和记录，再导入这份备份。此操作无法撤销。</span>
+      </label>
+      <div class="modal-actions">
+        <button class="btn" id="importCancel" type="button">取消</button>
+        <button class="btn primary" id="importConfirm" type="button">合并导入</button>
+      </div>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <input type="file" id="assetInput" multiple hidden>
+  <input type="file" id="importInput" accept="application/json,.json" hidden>
+  <input type="file" id="configImportInput" accept="application/json,.json" hidden>
+
+  <script src="lab-archive.js"></script>
+  <script>
+    "use strict";
+
+    (function () {
+      const DB = window.InteractiveLab;
+      if (!DB) {
+        document.getElementById("dbAlert").hidden = false;
+        return;
+      }
+
+      const state = {
+        works: [],
+        activeId: null,
+        currentWork: null,
+        bundle: { assets: [], revisions: [], events: [] },
+        tab: "overview",
+        editId: null,
+        assetUrls: [],
+        eventFilter: "all",
+        importPayload: null
+      };
+
+      const EVENT_LABELS = {
+        session_start: "进入",
+        session_end: "离开",
+        gesture: "手势",
+        wish: "许愿",
+        setting: "设置",
+        config: "配置",
+        launch: "打开",
+        asset: "素材",
+        archive: "归档"
+      };
+
+      const SEED_WORKS = [
+        {
+          id: "mountain",
+          title: "山海之间",
+          en: "Between Mountains & Dreams",
+          entry: "mountain.html",
+          status: "live",
+          accent: "#7294a8",
+          description: "一片写给夜晚的互动风景。移动指尖，山脊与月光会跟着呼吸。",
+          order: 1,
+          config: { view: "night", parallax: 0.6, moon: true }
+        },
+        {
+          id: "christmas",
+          title: "圣诞树",
+          en: "Grand Luxury Tree",
+          entry: "christmas.html",
+          status: "live",
+          accent: "#e7c47e",
+          description: "一棵由粒子组成的圣诞树：手势聚散星尘，照片与音乐也住进树里。",
+          order: 2,
+          config: {
+            line1: "Merry",
+            line2: "Christmas",
+            fontKey: "style1",
+            fontSize: 100,
+            color: "#fceea7",
+            treeParticles: 1500,
+            dustParticles: 2500
+          }
+        },
+        {
+          id: "cosmos",
+          title: "星际漫游",
+          en: "Star Wanderer",
+          entry: "star-wanderer/index.html",
+          status: "live",
+          accent: "#9b7cc9",
+          description: "一面由星粒组成的情绪星云镜。表情或手势把情绪翻译成天气，也会聚成小人和烟花。",
+          order: 3,
+          config: {
+            input: ["expression", "gesture"],
+            emotions: 5,
+            storyAnimations: true,
+            customPalette: true
+          }
+        },
+        {
+          id: "forest",
+          title: "林间漫步",
+          en: "Forest Walk",
+          entry: "forest.html",
+          status: "progress",
+          accent: "#6f9277",
+          description: "穿过一片由风与叶声组成的森林，找到属于自己的小径。",
+          order: 4,
+          config: { palette: "green", ambience: true, season: "spring" }
+        },
+        {
+          id: "life-os",
+          title: "日常节律",
+          en: "A Day in Order",
+          entry: "life-os.html",
+          status: "live",
+          accent: "#6d9bb3",
+          description: "一个安静的生活面板：任务、习惯与心情，都在本地被好好收着。",
+          order: 5,
+          config: { weekStartsOn: "monday", showMood: true }
+        }
+      ];
+
+      /* ---------- DOM ---------- */
+
+      const dbStatus = document.getElementById("dbStatus");
+      const dbStatusText = document.getElementById("dbStatusText");
+      const dbAlert = document.getElementById("dbAlert");
+      const workList = document.getElementById("workList");
+      const sidebarStats = document.getElementById("sidebarStats");
+      const emptyWorkspace = document.getElementById("emptyWorkspace");
+      const workView = document.getElementById("workView");
+      const workKicker = document.getElementById("workKicker");
+      const workTitle = document.getElementById("workTitle");
+      const workDescription = document.getElementById("workDescription");
+      const openWorkLink = document.getElementById("openWorkLink");
+      const workStats = document.getElementById("workStats");
+      const overviewContent = document.getElementById("overviewContent");
+      const configEditor = document.getElementById("configEditor");
+      const configStatus = document.getElementById("configStatus");
+      const assetList = document.getElementById("assetList");
+      const uploadStatus = document.getElementById("uploadStatus");
+      const dropzone = document.getElementById("dropzone");
+      const assetInput = document.getElementById("assetInput");
+      const versionList = document.getElementById("versionList");
+      const eventFilter = document.getElementById("eventFilter");
+      const eventSummary = document.getElementById("eventSummary");
+      const eventList = document.getElementById("eventList");
+      const eventFootnote = document.getElementById("eventFootnote");
+      const exportWorkDescription = document.getElementById("exportWorkDescription");
+      const toastElement = document.getElementById("toast");
+
+      const workDialog = document.getElementById("workDialog");
+      const workForm = document.getElementById("workForm");
+      const fieldTitle = document.getElementById("fieldTitle");
+      const fieldEn = document.getElementById("fieldEn");
+      const fieldEntry = document.getElementById("fieldEntry");
+      const fieldStatus = document.getElementById("fieldStatus");
+      const fieldDescription = document.getElementById("fieldDescription");
+      const fieldAccent = document.getElementById("fieldAccent");
+      const workFormNote = document.getElementById("workFormNote");
+      const workFormSubmit = document.getElementById("workFormSubmit");
+
+      const confirmDialog = document.getElementById("confirmDialog");
+      const confirmTitle = document.getElementById("confirmTitle");
+      const confirmText = document.getElementById("confirmText");
+      const confirmOk = document.getElementById("confirmOk");
+
+      const versionDialog = document.getElementById("versionDialog");
+      const versionJson = document.getElementById("versionJson");
+
+      const importDialog = document.getElementById("importDialog");
+      const importSummary = document.getElementById("importSummary");
+      const importList = document.getElementById("importList");
+      const importReplace = document.getElementById("importReplace");
+      const importConfirm = document.getElementById("importConfirm");
+      const importInput = document.getElementById("importInput");
+      const configImportInput = document.getElementById("configImportInput");
+
+      let toastTimer = 0;
+
+      /* ---------- Utilities ---------- */
+
+      function escapeHtml(value) {
+        return String(value == null ? "" : value).replace(/[&<>"']/g, function (character) {
+          return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[character];
+        });
+      }
+
+      function formatDate(timestamp) {
+        if (!timestamp) return "—";
+        return new Intl.DateTimeFormat("zh-CN", {
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit"
+        }).format(new Date(timestamp));
+      }
+
+      function formatFullDate(timestamp) {
+        if (!timestamp) return "—";
+        return new Intl.DateTimeFormat("zh-CN", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit"
+        }).format(new Date(timestamp));
+      }
+
+      function formatBytes(bytes) {
+        const value = Number(bytes) || 0;
+        if (value < 1024) return value + " B";
+        if (value < 1024 * 1024) return (value / 1024).toFixed(1) + " KB";
+        if (value < 1024 * 1024 * 1024) return (value / (1024 * 1024)).toFixed(1) + " MB";
+        return (value / (1024 * 1024 * 1024)).toFixed(2) + " GB";
+      }
+
+      function formatDuration(ms) {
+        const total = Math.max(0, Math.round((Number(ms) || 0) / 1000));
+        if (total < 60) return total + " 秒";
+        const minutes = Math.floor(total / 60);
+        const seconds = total % 60;
+        if (minutes < 60) return minutes + " 分 " + seconds + " 秒";
+        const hours = Math.floor(minutes / 60);
+        return hours + " 小时 " + (minutes % 60) + " 分";
+      }
+
+      function deepClone(value) {
+        return JSON.parse(JSON.stringify(value));
+      }
+
+      function showToast(message, isError) {
+        toastElement.textContent = message;
+        toastElement.dataset.kind = isError ? "error" : "";
+        toastElement.classList.add("is-visible");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () {
+          toastElement.classList.remove("is-visible");
+        }, 3200);
+      }
+
+      function setConfigStatus(message, kind) {
+        configStatus.textContent = message || "";
+        configStatus.dataset.kind = kind || "";
+      }
+
+      function setDbStatus(kind, text) {
+        dbStatus.classList.remove("is-ready", "is-error");
+        if (kind) dbStatus.classList.add(kind === "ready" ? "is-ready" : "is-error");
+        dbStatusText.textContent = text;
+      }
+
+      /* ---------- IndexedDB helpers ---------- */
+
+      function dbRequest(storeName, mode, action) {
+        return DB.openDB().then(function (db) {
+          return new Promise(function (resolve, reject) {
+            try {
+              const transaction = db.transaction(storeName, mode);
+              const request = action(transaction.objectStore(storeName));
+              transaction.oncomplete = function () {
+                resolve(request ? request.result : undefined);
+              };
+              transaction.onerror = function () {
+                reject(transaction.error || (request && request.error) || new Error("档案馆操作失败"));
+              };
+              transaction.onabort = function () {
+                reject(transaction.error || new Error("档案馆操作被中断"));
+              };
+            } catch (error) {
+              reject(error);
+            }
+          });
+        });
+      }
+
+      function getAll(storeName, indexName, query) {
+        return DB.openDB().then(function (db) {
+          return new Promise(function (resolve, reject) {
+            try {
+              const transaction = db.transaction(storeName, "readonly");
+              const store = transaction.objectStore(storeName);
+              const source = indexName ? store.index(indexName) : store;
+              const request = query === undefined ? source.getAll() : source.getAll(query);
+              transaction.oncomplete = function () { resolve(request.result); };
+              transaction.onerror = function () { reject(transaction.error || request.error); };
+              transaction.onabort = function () { reject(transaction.error || new Error("读取被中断")); };
+            } catch (error) {
+              reject(error);
+            }
+          });
+        });
+      }
+
+      function putRecord(storeName, value) {
+        return dbRequest(storeName, "readwrite", function (store) {
+          return store.put(value);
+        });
+      }
+
+      function deleteRecord(storeName, key) {
+        return dbRequest(storeName, "readwrite", function (store) {
+          return store.delete(key);
+        });
+      }
+
+      function clearStore(storeName) {
+        return dbRequest(storeName, "readwrite", function (store) {
+          return store.clear();
+        });
+      }
+
+      function deleteByIndex(storeName, indexName, key) {
+        return DB.openDB().then(function (db) {
+          return new Promise(function (resolve, reject) {
+            try {
+              const transaction = db.transaction(storeName, "readwrite");
+              const store = transaction.objectStore(storeName);
+              const request = store.index(indexName).openKeyCursor(IDBKeyRange.only(key));
+              request.onsuccess = function () {
+                const cursor = request.result;
+                if (cursor) {
+                  store.delete(cursor.primaryKey);
+                  cursor.continue();
+                }
+              };
+              transaction.oncomplete = function () { resolve(); };
+              transaction.onerror = function () { reject(transaction.error); };
+              transaction.onabort = function () { reject(transaction.error || new Error("删除被中断")); };
+            } catch (error) {
+              reject(error);
+            }
+          });
+        });
+      }
+
+      /* ---------- Seeding ---------- */
+
+      async function seedArchive() {
+        const flag = await dbRequest("meta", "readonly", function (store) {
+          return store.get("seeded-v1");
+        });
+
+        if (flag) return;
+
+        const existing = await getAll("works");
+        if (!existing.length) {
+          const now = Date.now();
+          for (let i = 0; i < SEED_WORKS.length; i++) {
+            const seed = SEED_WORKS[i];
+            const work = {
+              id: seed.id,
+              title: seed.title,
+              en: seed.en,
+              entry: seed.entry,
+              status: seed.status,
+              accent: seed.accent,
+              description: seed.description,
+              order: seed.order,
+              config: deepClone(seed.config),
+              createdAt: now + i,
+              updatedAt: now + i
+            };
+            await putRecord("works", work);
+            await putRecord("revisions", {
+              id: DB.uid("rev"),
+              workId: work.id,
+              label: "初始配置",
+              config: deepClone(work.config),
+              createdAt: now + i,
+              reason: "seed"
+            });
+          }
+        }
+
+        await putRecord("meta", { key: "seeded-v1", value: true, at: Date.now() });
+      }
+
+      /* 已经存在的档案馆也要认识新上线的《星际漫游》。只迁移一次，
+         不覆盖之后用户在档案馆里做的手动修改。 */
+      async function syncStarWanderer() {
+        const flag = await dbRequest("meta", "readonly", function (store) {
+          return store.get("star-wanderer-live-v1");
+        });
+        if (flag) return;
+
+        const seed = SEED_WORKS.find(function (item) { return item.id === "cosmos"; });
+        let work = await DB.getWork("cosmos");
+
+        if (!work && seed) {
+          const now = Date.now();
+          const created = {
+            id: seed.id,
+            title: seed.title,
+            en: seed.en,
+            entry: seed.entry,
+            status: seed.status,
+            accent: seed.accent,
+            description: seed.description,
+            order: seed.order,
+            config: deepClone(seed.config),
+            createdAt: now,
+            updatedAt: now
+          };
+          await putRecord("works", created);
+          await putRecord("revisions", {
+            id: DB.uid("rev"),
+            workId: created.id,
+            label: "初始配置",
+            config: deepClone(created.config),
+            createdAt: now,
+            reason: "seed-star-wanderer"
+          });
+        } else if (work && (work.entry === "cosmos.html" || work.status === "progress")) {
+          work.title = "星际漫游";
+          work.en = "Star Wanderer";
+          work.entry = "star-wanderer/index.html";
+          work.status = "live";
+          work.accent = "#9b7cc9";
+          work.description = "一面由星粒组成的情绪星云镜。表情或手势把情绪翻译成天气，也会聚成小人和烟花。";
+          work.config = Object.assign({}, work.config || {}, {
+            input: ["expression", "gesture"],
+            emotions: 5,
+            storyAnimations: true,
+            customPalette: true
+          });
+          work.updatedAt = Date.now();
+          await putRecord("works", work);
+          await putRecord("revisions", {
+            id: DB.uid("rev"),
+            workId: work.id,
+            label: "星际漫游上线",
+            config: deepClone(work.config),
+            createdAt: Date.now(),
+            reason: "sync-star-wanderer"
+          });
+        }
+
+        await putRecord("meta", { key: "star-wanderer-live-v1", value: true, at: Date.now() });
+      }
+
+      /* ---------- Loading ---------- */
+
+      function sortWorks(works) {
+        return works.sort(function (a, b) {
+          const orderA = typeof a.order === "number" ? a.order : 999;
+          const orderB = typeof b.order === "number" ? b.order : 999;
+          if (orderA !== orderB) return orderA - orderB;
+          return (a.createdAt || 0) - (b.createdAt || 0);
+        });
+      }
+
+      async function loadBundle(workId) {
+        const results = await Promise.all([
+          getAll("assets", "workId", workId),
+          getAll("revisions", "workId", workId),
+          getAll("events", "workId", workId)
+        ]);
+
+        return {
+          assets: results[0].sort(function (a, b) { return (b.createdAt || 0) - (a.createdAt || 0); }),
+          revisions: results[1].sort(function (a, b) { return (b.createdAt || 0) - (a.createdAt || 0); }),
+          events: results[2].sort(function (a, b) { return (b.createdAt || 0) - (a.createdAt || 0); })
+        };
+      }
+
+      async function refreshWorks() {
+        state.works = sortWorks(await getAll("works"));
+        renderSidebar();
+      }
+
+      async function selectWork(id) {
+        const work = state.works.find(function (item) { return item.id === id; }) || await DB.getWork(id);
+        if (!work) return;
+
+        state.activeId = id;
+        state.currentWork = work;
+        state.bundle = await loadBundle(id);
+
+        configEditor.value = JSON.stringify(work.config || {}, null, 2);
+        setConfigStatus("");
+
+        emptyWorkspace.hidden = true;
+        workView.hidden = false;
+
+        renderSidebar();
+        renderWorkHeader();
+        setTab("overview");
+        renderBundle();
+        await renderSidebarStats();
+      }
+
+      async function reloadCurrent(updateEditor) {
+        state.works = sortWorks(await getAll("works"));
+        state.currentWork = state.works.find(function (work) { return work.id === state.activeId; }) || null;
+
+        if (!state.currentWork) {
+          showEmptyWorkspace();
+          renderSidebar();
+          await renderSidebarStats();
+          return;
+        }
+
+        state.bundle = await loadBundle(state.activeId);
+        renderSidebar();
+        renderWorkHeader();
+        if (updateEditor) {
+          configEditor.value = JSON.stringify(state.currentWork.config || {}, null, 2);
+        }
+        renderBundle();
+        await renderSidebarStats();
+      }
+
+      function showEmptyWorkspace() {
+        emptyWorkspace.hidden = false;
+        workView.hidden = true;
+        state.currentWork = null;
+        state.bundle = { assets: [], revisions: [], events: [] };
+      }
+
+      /* ---------- Rendering ---------- */
+
+      function renderSidebar() {
+        if (!state.works.length) {
+          workList.innerHTML = "";
+          return;
+        }
+
+        workList.innerHTML = state.works.map(function (work, index) {
+          const active = work.id === state.activeId ? " is-active" : "";
+          const dotClass = work.status === "progress" ? " is-progress" : "";
+          return '<li><button class="work-item' + active + '" type="button" data-work-id="' + escapeHtml(work.id) + '">' +
+            '<span class="work-item-no">' + String(index + 1).padStart(2, "0") + '</span>' +
+            '<span class="work-item-main"><strong>' + escapeHtml(work.title) + '</strong><small>' +
+            escapeHtml(work.en || work.entry || "untitled") + '</small></span>' +
+            '<span class="work-dot' + dotClass + '" style="--accent:' + escapeHtml(work.accent || "#b9a8d4") + '"></span>' +
+            '</button></li>';
+        }).join("");
+      }
+
+      async function renderSidebarStats() {
+        try {
+          const results = await Promise.all([getAll("assets"), getAll("events")]);
+          const assets = results[0];
+          const events = results[1];
+          const sessions = events.filter(function (event) { return event.type === "session_end"; });
+          const duration = sessions.reduce(function (sum, event) {
+            return sum + (Number(event.durationMs) || 0);
+          }, 0);
+
+          sidebarStats.innerHTML =
+            '<div class="sidebar-stat"><strong>' + state.works.length + '</strong><span>作品</span></div>' +
+            '<div class="sidebar-stat"><strong>' + events.length + '</strong><span>交互记录</span></div>' +
+            '<div class="sidebar-stat"><strong>' + assets.length + '</strong><span>素材</span></div>' +
+            '<div class="sidebar-stat"><strong>' + (duration ? formatDuration(duration) : "0 分") + '</strong><span>累计体验</span></div>';
+        } catch (error) {
+          sidebarStats.innerHTML = "";
+        }
+      }
+
+      function renderWorkHeader() {
+        const work = state.currentWork;
+        if (!work) return;
+
+        const index = state.works.findIndex(function (item) { return item.id === work.id; });
+        const statusLabel = work.status === "live" ? "OPEN" : "IN PROGRESS";
+
+        workKicker.textContent = "WORK " + String(index + 1).padStart(2, "0") + " / " + statusLabel;
+        workTitle.textContent = work.title;
+        workDescription.textContent = work.description || "还没有写描述。";
+
+        if (work.status === "live" && work.entry) {
+          openWorkLink.hidden = false;
+          openWorkLink.href = work.entry;
+        } else {
+          openWorkLink.hidden = true;
+        }
+
+        exportWorkDescription.textContent = "只导出《" + work.title + "》的配置、版本、素材与交互记录。";
+      }
+
+      function renderBundle() {
+        renderStats();
+        renderOverview();
+        renderAssets();
+        renderVersions();
+        renderEvents();
+      }
+
+      function renderStats() {
+        const assets = state.bundle.assets;
+        const revisions = state.bundle.revisions;
+        const events = state.bundle.events;
+        const sessions = events.filter(function (event) { return event.type === "session_end"; });
+        const duration = sessions.reduce(function (sum, event) { return sum + (Number(event.durationMs) || 0); }, 0);
+        const interactions = events.filter(function (event) {
+          return event.type !== "session_start" && event.type !== "session_end";
+        }).length;
+        const totalSize = assets.reduce(function (sum, asset) { return sum + (Number(asset.size) || 0); }, 0);
+        const latestRevision = revisions[0];
+
+        workStats.innerHTML =
+          '<div class="stat"><span>素材 / Assets</span><strong>' + assets.length + '</strong><small>' + formatBytes(totalSize) + '</small></div>' +
+          '<div class="stat"><span>版本 / Versions</span><strong>' + revisions.length + '</strong><small>' + (latestRevision ? "最近 " + formatDate(latestRevision.createdAt) : "尚未保存") + '</small></div>' +
+          '<div class="stat"><span>互动 / Interactions</span><strong>' + interactions + '</strong><small>' + events.length + ' 条记录</small></div>' +
+          '<div class="stat"><span>体验 / Duration</span><strong>' + formatDuration(duration) + '</strong><small>' + sessions.length + ' 次会话</small></div>';
+      }
+
+      function eventLabel(event) {
+        const type = event.type || "event";
+        if (type === "session_start") return "进入";
+        if (type === "session_end") return "离开";
+        return EVENT_LABELS[type] || type;
+      }
+
+      function eventSecondary(event) {
+        const time = formatFullDate(event.createdAt);
+        const duration = event.durationMs ? " · 体验 " + formatDuration(event.durationMs) : "";
+        return time + duration;
+      }
+
+      function renderOverview() {
+        const work = state.currentWork;
+        if (!work) return;
+
+        const events = state.bundle.events;
+        const recent = events.slice(0, 6);
+        const config = work.config && typeof work.config === "object" ? work.config : {};
+
+        const recentHtml = recent.length
+          ? '<ul class="mini-events">' + recent.map(function (event) {
+              return '<li><span>' + escapeHtml(eventLabel(event)) + '</span><div><strong>' +
+                escapeHtml(event.detail || "——") + '</strong><small>' + escapeHtml(eventSecondary(event)) +
+                '</small></div></li>';
+            }).join("") + '</ul>'
+          : '<p class="empty-inline">还没有交互记录。打开作品，动一动鼠标，记录会出现在这里。</p>';
+
+        overviewContent.innerHTML =
+          '<div class="overview-columns">' +
+            '<section class="panel-block">' +
+              '<div class="block-head"><h3>最近活动</h3><button class="btn small" type="button" data-go-tab="events">查看全部</button></div>' +
+              recentHtml +
+            '</section>' +
+            '<section class="panel-block">' +
+              '<div class="block-head"><h3>配置摘要</h3><button class="btn small" type="button" data-go-tab="config">编辑配置</button></div>' +
+              '<pre class="mini-json">' + escapeHtml(JSON.stringify(config, null, 2)) + '</pre>' +
+              '<p class="block-note">配置保存在本地档案馆中；新版「圣诞树」可以把它自己面板里的设置同步过来，也可以在作品里点「读取档案馆设置」应用这里恢复的版本。</p>' +
+            '</section>' +
+          '</div>' +
+          '<section class="panel-block">' +
+            '<h3>作品信息</h3>' +
+            '<dl class="meta-list">' +
+              '<div><dt>入口文件</dt><dd>' + escapeHtml(work.entry || "—") + '</dd></div>' +
+              '<div><dt>状态</dt><dd>' + (work.status === "live" ? "已开放" : "制作中") + '</dd></div>' +
+              '<div><dt>最近修改</dt><dd>' + escapeHtml(formatFullDate(work.updatedAt)) + '</dd></div>' +
+              '<div><dt>创建时间</dt><dd>' + escapeHtml(formatFullDate(work.createdAt)) + '</dd></div>' +
+              '<div><dt>作品 ID</dt><dd>' + escapeHtml(work.id) + '</dd></div>' +
+              '<div><dt>素材占用</dt><dd>' + formatBytes(state.bundle.assets.reduce(function (sum, asset) { return sum + (Number(asset.size) || 0); }, 0)) + '</dd></div>' +
+            '</dl>' +
+          '</section>';
+      }
+
+      function releaseAssetUrls() {
+        state.assetUrls.forEach(function (url) {
+          try { URL.revokeObjectURL(url); } catch (error) { /* 忽略 */ }
+        });
+        state.assetUrls = [];
+      }
+
+      function fileBadge(asset) {
+        const type = String(asset.type || "");
+        const name = String(asset.name || "");
+        if (/pdf/i.test(type) || /\.pdf$/i.test(name)) return "PDF";
+        if (/json/i.test(type) || /\.json$/i.test(name)) return "JSON";
+        if (/zip/i.test(type) || /\.zip$/i.test(name)) return "ZIP";
+        if (/html/i.test(type) || /\.html?$/i.test(name)) return "HTML";
+        if (/javascript/i.test(type) || /\.js$/i.test(name)) return "JS";
+        if (/css/i.test(type) || /\.css$/i.test(name)) return "CSS";
+        return "FILE";
+      }
+
+      function renderAssets() {
+        releaseAssetUrls();
+
+        if (!state.bundle.assets.length) {
+          assetList.innerHTML = '<p class="empty-note">还没有素材。照片、音乐、PDF 或代码文件，都可以放进来。</p>';
+          return;
+        }
+
+        assetList.innerHTML = state.bundle.assets.map(function (asset) {
+          let url = null;
+          if (asset.blob instanceof Blob) {
+            url = URL.createObjectURL(asset.blob);
+            state.assetUrls.push(url);
+          }
+
+          const type = String(asset.type || "");
+          let preview;
+          let extra = "";
+
+          if (url && type.indexOf("image/") === 0) {
+            preview = '<img src="' + url + '" alt="" loading="lazy">';
+          } else if (url && type.indexOf("audio/") === 0) {
+            preview = '<span aria-hidden="true">♪</span>';
+            extra = '<audio controls preload="metadata" src="' + url + '"></audio>';
+          } else if (url && type.indexOf("video/") === 0) {
+            preview = '<span aria-hidden="true">▶</span>';
+          } else {
+            preview = '<span aria-hidden="true">' + escapeHtml(fileBadge(asset)) + '</span>';
+          }
+
+          return '<article class="asset-card">' +
+            '<div class="asset-preview">' + preview + '</div>' +
+            '<div class="asset-meta"><strong title="' + escapeHtml(asset.name) + '">' + escapeHtml(asset.name) + '</strong>' +
+              '<small>' + escapeHtml(type || "unknown") + ' · ' + formatBytes(asset.size) + ' · ' + escapeHtml(formatDate(asset.createdAt)) + '</small>' +
+              extra +
+            '</div>' +
+            '<div class="asset-actions">' +
+              '<button class="btn small" type="button" data-asset-action="download" data-asset-id="' + escapeHtml(asset.id) + '">下载</button>' +
+              '<button class="btn small danger" type="button" data-asset-action="delete" data-asset-id="' + escapeHtml(asset.id) + '">删除</button>' +
+            '</div>' +
+          '</article>';
+        }).join("");
+      }
+
+      function renderVersions() {
+        if (!state.bundle.revisions.length) {
+          versionList.innerHTML = '<li class="empty-note" style="display:block;padding:24px;">还没有版本记录。保存一次配置后，快照会出现在这里。</li>';
+          return;
+        }
+
+        versionList.innerHTML = state.bundle.revisions.map(function (revision) {
+          const fieldCount = revision.config && typeof revision.config === "object"
+            ? Object.keys(revision.config).length
+            : 0;
+          return '<li class="version-row">' +
+            '<div class="version-main"><strong>' + escapeHtml(revision.label || "配置快照") + '</strong>' +
+              '<small>' + escapeHtml(formatFullDate(revision.createdAt)) + ' · ' + fieldCount + ' 个字段</small></div>' +
+            '<div class="version-actions">' +
+              '<button class="btn small" type="button" data-version-action="view" data-version-id="' + escapeHtml(revision.id) + '">查看</button>' +
+              '<button class="btn small" type="button" data-version-action="restore" data-version-id="' + escapeHtml(revision.id) + '">恢复</button>' +
+            '</div>' +
+          '</li>';
+        }).join("");
+      }
+
+      function renderEvents() {
+        const events = state.bundle.events;
+        const sessions = events.filter(function (event) { return event.type === "session_end"; });
+        const duration = sessions.reduce(function (sum, event) { return sum + (Number(event.durationMs) || 0); }, 0);
+        const interactions = events.filter(function (event) {
+          return event.type !== "session_start" && event.type !== "session_end";
+        }).length;
+
+        eventSummary.innerHTML =
+          '<span>' + sessions.length + ' 次体验</span>' +
+          '<span>累计 ' + formatDuration(duration) + '</span>' +
+          '<span>' + interactions + ' 个互动</span>' +
+          '<span>' + events.length + ' 条记录</span>';
+
+        const filter = state.eventFilter;
+        const filtered = events.filter(function (event) {
+          if (filter === "all") return true;
+          if (filter === "session") return event.type === "session_start" || event.type === "session_end";
+          return event.type === filter;
+        });
+
+        if (!filtered.length) {
+          eventList.innerHTML = '<li class="empty-inline">这一类记录还是空的。打开作品试试手势、点击或许愿。</li>';
+          eventFootnote.textContent = "";
+          return;
+        }
+
+        const visible = filtered.slice(0, 200);
+        eventList.innerHTML = visible.map(function (event) {
+          return '<li class="event-row">' +
+            '<span class="event-chip">' + escapeHtml(eventLabel(event)) + '</span>' +
+            '<div class="event-copy"><strong>' + escapeHtml(event.detail || "——") + '</strong>' +
+              '<small>' + escapeHtml(eventSecondary(event)) + '</small></div>' +
+          '</li>';
+        }).join("");
+
+        eventFootnote.textContent = filtered.length > 200
+          ? "只显示最近 200 条记录；完整记录仍保存在档案馆和导出备份中。"
+          : "";
+      }
+
+      function setTab(tabName) {
+        state.tab = tabName;
+
+        document.querySelectorAll(".tab").forEach(function (button) {
+          const active = button.dataset.tab === tabName;
+          button.classList.toggle("is-active", active);
+          button.setAttribute("aria-selected", String(active));
+          button.tabIndex = active ? 0 : -1;
+        });
+
+        document.querySelectorAll(".tab-panel").forEach(function (panel) {
+          panel.hidden = panel.id !== "panel-" + tabName;
+        });
+
+        if (tabName === "events") renderEvents();
+        if (tabName === "assets") renderAssets();
+      }
+
+      /* ---------- Config ---------- */
+
+      function readConfigFromEditor() {
+        let parsed;
+        try {
+          parsed = JSON.parse(configEditor.value);
+        } catch (error) {
+          setConfigStatus("JSON 格式有误：" + error.message, "error");
+          return null;
+        }
+        if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+          setConfigStatus("配置必须是一个 JSON 对象，例如 { \"sound\": true }。", "error");
+          return null;
+        }
+        return parsed;
+      }
+
+      async function saveConfig() {
+        if (!state.currentWork) return;
+        const parsed = readConfigFromEditor();
+        if (!parsed) return;
+
+        const work = state.currentWork;
+        work.config = parsed;
+        work.updatedAt = Date.now();
+
+        try {
+          await putRecord("works", work);
+          const revision = {
+            id: DB.uid("rev"),
+            workId: work.id,
+            label: "手动保存",
+            config: deepClone(parsed),
+            createdAt: Date.now(),
+            reason: "manual"
+          };
+          await putRecord("revisions", revision);
+          configEditor.value = JSON.stringify(parsed, null, 2);
+          setConfigStatus("已保存，并留下一个新的版本快照。", "success");
+          showToast("配置已保存");
+          await reloadCurrent(false);
+        } catch (error) {
+          setConfigStatus("保存失败：" + error.message, "error");
+          showToast("保存失败", true);
+        }
+      }
+
+      function formatConfig() {
+        const parsed = readConfigFromEditor();
+        if (!parsed) return;
+        configEditor.value = JSON.stringify(parsed, null, 2);
+        setConfigStatus("已格式化。", "success");
+      }
+
+      function revertConfig() {
+        if (!state.currentWork) return;
+        configEditor.value = JSON.stringify(state.currentWork.config || {}, null, 2);
+        setConfigStatus("已恢复到上次保存的配置。", "success");
+      }
+
+      function downloadConfig() {
+        if (!state.currentWork) return;
+        const parsed = readConfigFromEditor();
+        if (!parsed) return;
+        const payload = {
+          format: "interactive-lab-work-config",
+          version: 1,
+          exportedAt: new Date().toISOString(),
+          workId: state.currentWork.id,
+          title: state.currentWork.title,
+          config: parsed
+        };
+        downloadJson(
+          "interactive-lab-" + state.currentWork.id + "-config-" + new Date().toISOString().slice(0, 10) + ".json",
+          JSON.stringify(payload, null, 2)
+        );
+        setConfigStatus("配置 JSON 已导出。", "success");
+      }
+
+      function handleConfigImport(file) {
+        const reader = new FileReader();
+        reader.onload = function () {
+          try {
+            const parsed = JSON.parse(reader.result);
+            const config = parsed && parsed.format === "interactive-lab-work-config" ? parsed.config : parsed;
+            if (!config || typeof config !== "object" || Array.isArray(config)) {
+              throw new Error("文件里没有可用的配置对象");
+            }
+            configEditor.value = JSON.stringify(config, null, 2);
+            setConfigStatus("配置已载入编辑器。点击「保存并生成版本」后才会真正生效。", "success");
+            showToast("配置已载入编辑器");
+          } catch (error) {
+            setConfigStatus("无法读取配置：" + error.message, "error");
+          }
+        };
+        reader.onerror = function () {
+          setConfigStatus("无法读取这个文件。", "error");
+        };
+        reader.readAsText(file);
+      }
+
+      /* ---------- Assets ---------- */
+
+      async function uploadFiles(fileList) {
+        if (!state.currentWork) return;
+        const files = Array.prototype.slice.call(fileList || []);
+        if (!files.length) return;
+
+        uploadStatus.textContent = "正在归档 " + files.length + " 个文件…";
+        try {
+          for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            await putRecord("assets", {
+              id: DB.uid("asset"),
+              workId: state.currentWork.id,
+              name: file.name.slice(0, 180),
+              type: file.type || "application/octet-stream",
+              size: file.size,
+              blob: file,
+              createdAt: Date.now()
+            });
+          }
+          const work = state.currentWork;
+          work.updatedAt = Date.now();
+          await putRecord("works", work);
+          uploadStatus.textContent = "已归档 " + files.length + " 个文件。";
+          await reloadCurrent(false);
+          showToast("素材已归档");
+        } catch (error) {
+          uploadStatus.textContent = "上传失败：" + error.message;
+          showToast("上传失败", true);
+        }
+      }
+
+      async function downloadAsset(asset) {
+        if (!asset || !(asset.blob instanceof Blob)) return;
+        const url = URL.createObjectURL(asset.blob);
+        const anchor = document.createElement("a");
+        anchor.href = url;
+        anchor.download = asset.name || "asset";
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+      }
+
+      async function deleteAsset(asset) {
+        if (!asset) return;
+        const confirmed = await askConfirm(
+          "删除这个素材？",
+          "《" + asset.name + "》会从这件作品的档案中删除，磁盘上如果有原文件不会被影响。",
+          "删除素材"
+        );
+        if (!confirmed) return;
+
+        try {
+          await deleteRecord("assets", asset.id);
+          const work = state.currentWork;
+          work.updatedAt = Date.now();
+          await putRecord("works", work);
+          await reloadCurrent(false);
+          showToast("素材已删除");
+        } catch (error) {
+          showToast("删除失败", true);
+        }
+      }
+
+      /* ---------- Versions ---------- */
+
+      function findRevision(id) {
+        return state.bundle.revisions.find(function (revision) { return revision.id === id; });
+      }
+
+      function viewRevision(revision) {
+        if (!revision) return;
+        versionJson.textContent = JSON.stringify(revision.config || {}, null, 2);
+        document.getElementById("versionDialogTitle").textContent =
+          "版本内容 · " + (revision.label || "配置快照");
+        versionDialog.showModal();
+      }
+
+      async function restoreRevision(revision) {
+        if (!revision || !state.currentWork) return;
+        const confirmed = await askConfirm(
+          "恢复这个版本？",
+          "当前配置会先自动保存为一个版本，然后切换到「" + (revision.label || "配置快照") + "」的内容。素材不会受影响。",
+          "恢复版本"
+        );
+        if (!confirmed) return;
+
+        const work = state.currentWork;
+        try {
+          await putRecord("revisions", {
+            id: DB.uid("rev"),
+            workId: work.id,
+            label: "恢复前自动保存",
+            config: deepClone(work.config || {}),
+            createdAt: Date.now(),
+            reason: "auto-before-restore"
+          });
+
+          work.config = deepClone(revision.config || {});
+          work.updatedAt = Date.now();
+          await putRecord("works", work);
+
+          await putRecord("revisions", {
+            id: DB.uid("rev"),
+            workId: work.id,
+            label: "恢复自 " + formatDate(revision.createdAt),
+            config: deepClone(work.config),
+            createdAt: Date.now() + 1,
+            reason: "restore"
+          });
+
+          await reloadCurrent(true);
+          showToast("已恢复到所选版本");
+        } catch (error) {
+          showToast("恢复失败", true);
+        }
+      }
+
+      /* ---------- Events ---------- */
+
+      async function clearEvents() {
+        if (!state.currentWork) return;
+        const confirmed = await askConfirm(
+          "清空交互记录？",
+          "《" + state.currentWork.title + "》的全部进入、手势、许愿与体验时长记录都会被删除。此操作无法撤销。",
+          "清空记录"
+        );
+        if (!confirmed) return;
+
+        try {
+          await deleteByIndex("events", "workId", state.currentWork.id);
+          state.bundle.events = [];
+          renderStats();
+          renderOverview();
+          renderEvents();
+          await renderSidebarStats();
+          showToast("交互记录已清空");
+        } catch (error) {
+          showToast("清空失败", true);
+        }
+      }
+
+      /* ---------- Generic confirm ---------- */
+
+      function askConfirm(title, text, okLabel) {
+        confirmTitle.textContent = title;
+        confirmText.textContent = text;
+        confirmOk.textContent = okLabel || "确认";
+        confirmDialog.returnValue = "";
+        confirmDialog.showModal();
+
+        return new Promise(function (resolve) {
+          function onClose() {
+            confirmDialog.removeEventListener("close", onClose);
+            resolve(confirmDialog.returnValue === "ok");
+          }
+          confirmDialog.addEventListener("close", onClose);
+        });
+      }
+
+      /* ---------- Work dialog ---------- */
+
+      function openWorkDialog(work) {
+        state.editId = work ? work.id : null;
+        workFormNote.dataset.kind = "";
+        workFormNote.textContent = work
+          ? "作品 ID 与已归档的素材、版本和交互记录绑定，修改资料不会改变 ID。"
+          : "入口文件需要和主站放在同一个文件夹中；也可以稍后再补。";
+
+        document.getElementById("workDialogTitle").textContent = work ? "编辑作品资料" : "新建作品";
+        workFormSubmit.textContent = work ? "保存修改" : "创建作品";
+
+        fieldTitle.value = work ? work.title || "" : "";
+        fieldEn.value = work ? work.en || "" : "";
+        fieldEntry.value = work ? work.entry || "" : "";
+        fieldStatus.value = work ? work.status || "progress" : "progress";
+        fieldDescription.value = work ? work.description || "" : "";
+        fieldAccent.value = work && /^#[0-9a-f]{6}$/i.test(work.accent || "") ? work.accent : "#b9a8d4";
+
+        workDialog.showModal();
+        fieldTitle.focus();
+      }
+
+      function deriveWorkId(entry) {
+        const base = String(entry || "").split(/[\\/]/).pop().replace(/\.html?$/i, "");
+        const slug = base.toLowerCase().replace(/[^a-z0-9_-]+/g, "-").replace(/^-+|-+$/g, "");
+        return slug || "work-" + Date.now().toString(36);
+      }
+
+      async function submitWorkForm(event) {
+        event.preventDefault();
+        const title = fieldTitle.value.trim();
+        const entry = fieldEntry.value.trim();
+
+        if (!title) {
+          workFormNote.textContent = "请先给作品起一个名字。";
+          workFormNote.dataset.kind = "error";
+          fieldTitle.focus();
+          return;
+        }
+
+        workFormSubmit.disabled = true;
+
+        try {
+          if (state.editId) {
+            const work = state.currentWork;
+            if (!work) return;
+            work.title = title;
+            work.en = fieldEn.value.trim();
+            work.entry = entry;
+            work.status = fieldStatus.value === "live" ? "live" : "progress";
+            work.description = fieldDescription.value.trim();
+            work.accent = fieldAccent.value;
+            work.updatedAt = Date.now();
+
+            await putRecord("works", work);
+            workDialog.close();
+            await reloadCurrent(false);
+            showToast("作品资料已更新");
+            return;
+          }
+
+          let id = deriveWorkId(entry);
+          const baseId = id;
+          let suffix = 2;
+          while (state.works.some(function (work) { return work.id === id; })) {
+            id = baseId + "-" + suffix;
+            suffix += 1;
+          }
+
+          const maxOrder = state.works.reduce(function (max, work) {
+            return Math.max(max, typeof work.order === "number" ? work.order : 0);
+          }, 0);
+
+          const now = Date.now();
+          const work = {
+            id: id,
+            title: title,
+            en: fieldEn.value.trim(),
+            entry: entry,
+            status: fieldStatus.value === "live" ? "live" : "progress",
+            accent: fieldAccent.value,
+            description: fieldDescription.value.trim(),
+            order: maxOrder + 1,
+            config: {},
+            createdAt: now,
+            updatedAt: now
+          };
+
+          await putRecord("works", work);
+          await putRecord("revisions", {
+            id: DB.uid("rev"),
+            workId: work.id,
+            label: "初始配置",
+            config: {},
+            createdAt: now,
+            reason: "initial"
+          });
+
+          workDialog.close();
+          await refreshWorks();
+          await selectWork(work.id);
+          showToast("作品已创建");
+        } catch (error) {
+          workFormNote.textContent = "保存失败：" + error.message;
+          workFormNote.dataset.kind = "error";
+        } finally {
+          workFormSubmit.disabled = false;
+        }
+      }
+
+      /* ---------- Delete work ---------- */
+
+      async function deleteCurrentWork() {
+        if (!state.currentWork) return;
+        const work = state.currentWork;
+        const assetCount = state.bundle.assets.length;
+        const revisionCount = state.bundle.revisions.length;
+        const eventCount = state.bundle.events.length;
+
+        const confirmed = await askConfirm(
+          "删除这件作品？",
+          "《" + work.title + "》的 " + assetCount + " 个素材、" + revisionCount + " 个版本和 " +
+          eventCount + " 条交互记录都会从档案馆删除。磁盘上的 HTML 作品文件不会被删除。",
+          "删除作品"
+        );
+        if (!confirmed) return;
+
+        try {
+          await deleteByIndex("assets", "workId", work.id);
+          await deleteByIndex("revisions", "workId", work.id);
+          await deleteByIndex("events", "workId", work.id);
+          await deleteRecord("works", work.id);
+          showToast("作品已从档案馆移除");
+          state.activeId = null;
+          await refreshWorks();
+          await renderSidebarStats();
+          if (state.works.length) {
+            await selectWork(state.works[0].id);
+          } else {
+            showEmptyWorkspace();
+          }
+        } catch (error) {
+          showToast("删除失败", true);
+        }
+      }
+
+      /* ---------- Export / import ---------- */
+
+      function downloadJson(filename, text) {
+        const blob = new Blob([text], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement("a");
+        anchor.href = url;
+        anchor.download = filename;
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+      }
+
+      function blobToDataURL(blob) {
+        return new Promise(function (resolve, reject) {
+          if (!(blob instanceof Blob)) {
+            reject(new Error("素材数据缺失"));
+            return;
+          }
+          const reader = new FileReader();
+          reader.onload = function () { resolve(reader.result); };
+          reader.onerror = function () { reject(reader.error || new Error("读取素材失败")); };
+          reader.readAsDataURL(blob);
+        });
+      }
+
+      async function dataURLToBlob(dataUrl) {
+        const response = await fetch(dataUrl);
+        return response.blob();
+      }
+
+      async function buildExport(workOnly) {
+        const works = workOnly && state.currentWork
+          ? [state.currentWork]
+          : await getAll("works");
+        const ids = new Set(works.map(function (work) { return work.id; }));
+
+        const results = await Promise.all([getAll("assets"), getAll("revisions"), getAll("events")]);
+        const assets = results[0].filter(function (asset) { return ids.has(asset.workId); });
+        const revisions = results[1].filter(function (revision) { return ids.has(revision.workId); });
+        const events = results[2].filter(function (event) { return ids.has(event.workId); });
+
+        const exportedAssets = [];
+        for (let i = 0; i < assets.length; i++) {
+          const asset = assets[i];
+          exportedAssets.push({
+            id: asset.id,
+            workId: asset.workId,
+            name: asset.name,
+            type: asset.type,
+            size: asset.size,
+            createdAt: asset.createdAt,
+            dataUrl: await blobToDataURL(asset.blob)
+          });
+        }
+
+        return {
+          format: "interactive-lab-archive",
+          version: 1,
+          exportedAt: new Date().toISOString(),
+          scope: workOnly ? "work:" + (state.currentWork ? state.currentWork.id : "unknown") : "all",
+          works: works,
+          revisions: revisions,
+          events: events,
+          assets: exportedAssets
+        };
+      }
+
+      async function handleExport(workOnly) {
+        const button = workOnly ? document.getElementById("exportWorkBtn") : document.getElementById("exportAllBtn");
+        const original = button.innerHTML;
+        button.disabled = true;
+        button.textContent = "正在打包…";
+
+        try {
+          const payload = await buildExport(workOnly);
+          const date = new Date().toISOString().slice(0, 10);
+          const filename = workOnly && state.currentWork
+            ? "interactive-lab-" + state.currentWork.id + "-" + date + ".json"
+            : "interactive-lab-archive-" + date + ".json";
+          downloadJson(filename, JSON.stringify(payload, null, 2));
+          showToast("备份已导出");
+        } catch (error) {
+          console.error(error);
+          showToast("导出失败：" + error.message, true);
+        } finally {
+          button.disabled = false;
+          button.innerHTML = original;
+        }
+      }
+
+      function validateImport(payload) {
+        if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+          throw new Error("文件内容不是有效的档案馆备份");
+        }
+        if (payload.format !== "interactive-lab-archive") {
+          throw new Error("不是 Interactive Lab 导出的档案格式");
+        }
+        if (!Array.isArray(payload.works)) {
+          throw new Error("备份里缺少作品列表");
+        }
+        return true;
+      }
+
+      function showImportDialog(payload, filename) {
+        state.importPayload = payload;
+        const counts = {
+          works: payload.works.length,
+          revisions: Array.isArray(payload.revisions) ? payload.revisions.length : 0,
+          events: Array.isArray(payload.events) ? payload.events.length : 0,
+          assets: Array.isArray(payload.assets) ? payload.assets.length : 0
+        };
+
+        importSummary.textContent = filename + " · " + counts.works + " 件作品，" +
+          counts.revisions + " 个版本，" + counts.events + " 条记录，" + counts.assets + " 个素材。";
+
+        importList.innerHTML = payload.works.slice(0, 12).map(function (work) {
+          return "<li>" + escapeHtml(work.title || work.id || "未命名作品") +
+            " <span style=\"opacity:.6\">· " + escapeHtml(work.entry || "无入口文件") + "</span></li>";
+        }).join("") + (payload.works.length > 12 ? "<li>……还有 " + (payload.works.length - 12) + " 件作品</li>" : "");
+
+        importReplace.checked = false;
+        importConfirm.textContent = "合并导入";
+        importDialog.showModal();
+      }
+
+      async function performImport(replace) {
+        const payload = state.importPayload;
+        if (!payload) return;
+
+        importConfirm.disabled = true;
+        importConfirm.textContent = "正在导入…";
+
+        try {
+          if (replace) {
+            await clearStore("works");
+            await clearStore("assets");
+            await clearStore("revisions");
+            await clearStore("events");
+            await clearStore("meta");
+          }
+
+          const existing = new Set((await getAll("works")).map(function (work) { return work.id; }));
+          let worksImported = 0;
+
+          for (let i = 0; i < payload.works.length; i++) {
+            const work = payload.works[i];
+            if (!work || typeof work.id !== "string" || typeof work.title !== "string") continue;
+            if (!replace && existing.has(work.id)) continue;
+
+            const record = Object.assign({}, work);
+            record.config = record.config && typeof record.config === "object" && !Array.isArray(record.config)
+              ? record.config
+              : {};
+            record.createdAt = Number(record.createdAt) || Date.now();
+            record.updatedAt = Number(record.updatedAt) || record.createdAt;
+            await putRecord("works", record);
+            worksImported += 1;
+          }
+
+          const revisions = Array.isArray(payload.revisions) ? payload.revisions : [];
+          for (let i = 0; i < revisions.length; i++) {
+            const revision = revisions[i];
+            if (revision && typeof revision.id === "string" && typeof revision.workId === "string" &&
+                revision.config && typeof revision.config === "object") {
+              await putRecord("revisions", revision);
+            }
+          }
+
+          const events = Array.isArray(payload.events) ? payload.events : [];
+          for (let i = 0; i < events.length; i++) {
+            const event = events[i];
+            if (event && typeof event.id === "string" && typeof event.workId === "string") {
+              await putRecord("events", event);
+            }
+          }
+
+          const assets = Array.isArray(payload.assets) ? payload.assets : [];
+          for (let i = 0; i < assets.length; i++) {
+            const asset = assets[i];
+            if (!asset || typeof asset.id !== "string" || typeof asset.workId !== "string" || !asset.dataUrl) continue;
+            const blob = await dataURLToBlob(asset.dataUrl);
+            const record = Object.assign({}, asset);
+            delete record.dataUrl;
+            record.blob = blob;
+            record.type = record.type || blob.type || "application/octet-stream";
+            record.size = Number(record.size) || blob.size;
+            record.createdAt = Number(record.createdAt) || Date.now();
+            await putRecord("assets", record);
+          }
+
+          await putRecord("meta", { key: "seeded-v1", value: true, at: Date.now() });
+
+          importDialog.close();
+          state.importPayload = null;
+          state.activeId = null;
+          await refreshWorks();
+          await renderSidebarStats();
+
+          if (state.works.length) {
+            await selectWork(state.works[0].id);
+          } else {
+            showEmptyWorkspace();
+          }
+
+          showToast("导入完成：新增或覆盖 " + worksImported + " 件作品");
+        } catch (error) {
+          console.error(error);
+          showToast("导入失败：" + error.message, true);
+        } finally {
+          importConfirm.disabled = false;
+          importConfirm.textContent = importReplace.checked ? "覆盖并导入" : "合并导入";
+        }
+      }
+
+      /* ---------- Bind events ---------- */
+
+      workList.addEventListener("click", function (event) {
+        const button = event.target.closest("[data-work-id]");
+        if (!button) return;
+        if (button.dataset.workId === state.activeId) return;
+        selectWork(button.dataset.workId).catch(function (error) {
+          showToast("无法打开作品：" + error.message, true);
+        });
+      });
+
+      document.querySelectorAll(".tab").forEach(function (button) {
+        button.addEventListener("click", function () {
+          setTab(button.dataset.tab);
+        });
+      });
+
+      overviewContent.addEventListener("click", function (event) {
+        const button = event.target.closest("[data-go-tab]");
+        if (!button) return;
+        setTab(button.dataset.goTab);
+      });
+
+      document.getElementById("newWorkBtn").addEventListener("click", function () { openWorkDialog(null); });
+      document.getElementById("emptyNewWorkBtn").addEventListener("click", function () { openWorkDialog(null); });
+      document.getElementById("editWorkBtn").addEventListener("click", function () {
+        if (state.currentWork) openWorkDialog(state.currentWork);
+      });
+      document.getElementById("deleteWorkBtn").addEventListener("click", deleteCurrentWork);
+
+      document.getElementById("workFormCancel").addEventListener("click", function () { workDialog.close(); });
+      workForm.addEventListener("submit", submitWorkForm);
+
+      confirmOk.addEventListener("click", function () {
+        confirmDialog.returnValue = "ok";
+        confirmDialog.close();
+      });
+      document.getElementById("confirmCancel").addEventListener("click", function () {
+        confirmDialog.returnValue = "cancel";
+        confirmDialog.close();
+      });
+
+      document.getElementById("versionCloseBtn").addEventListener("click", function () { versionDialog.close(); });
+
+      document.getElementById("saveConfigBtn").addEventListener("click", saveConfig);
+      document.getElementById("formatConfigBtn").addEventListener("click", formatConfig);
+      document.getElementById("revertConfigBtn").addEventListener("click", revertConfig);
+      document.getElementById("exportConfigBtn").addEventListener("click", downloadConfig);
+      document.getElementById("importConfigBtn").addEventListener("click", function () { configImportInput.click(); });
+      configImportInput.addEventListener("change", function () {
+        const file = configImportInput.files && configImportInput.files[0];
+        if (file) handleConfigImport(file);
+        configImportInput.value = "";
+      });
+
+      function openAssetPicker() { assetInput.click(); }
+      document.getElementById("assetPickBtn").addEventListener("click", openAssetPicker);
+      dropzone.addEventListener("click", openAssetPicker);
+      dropzone.addEventListener("keydown", function (event) {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          openAssetPicker();
+        }
+      });
+
+      ["dragenter", "dragover"].forEach(function (name) {
+        dropzone.addEventListener(name, function (event) {
+          event.preventDefault();
+          dropzone.classList.add("is-drag");
+        });
+      });
+
+      ["dragleave", "drop"].forEach(function (name) {
+        dropzone.addEventListener(name, function (event) {
+          event.preventDefault();
+          dropzone.classList.remove("is-drag");
+        });
+      });
+
+      dropzone.addEventListener("drop", function (event) {
+        if (event.dataTransfer && event.dataTransfer.files) {
+          uploadFiles(event.dataTransfer.files);
+        }
+      });
+
+      assetInput.addEventListener("change", function () {
+        if (assetInput.files && assetInput.files.length) {
+          uploadFiles(assetInput.files);
+        }
+        assetInput.value = "";
+      });
+
+      assetList.addEventListener("click", function (event) {
+        const button = event.target.closest("[data-asset-action]");
+        if (!button) return;
+        const asset = state.bundle.assets.find(function (item) { return item.id === button.dataset.assetId; });
+        if (!asset) return;
+
+        if (button.dataset.assetAction === "download") {
+          downloadAsset(asset);
+        } else if (button.dataset.assetAction === "delete") {
+          deleteAsset(asset);
+        }
+      });
+
+      versionList.addEventListener("click", function (event) {
+        const button = event.target.closest("[data-version-action]");
+        if (!button) return;
+        const revision = findRevision(button.dataset.versionId);
+        if (!revision) return;
+
+        if (button.dataset.versionAction === "view") {
+          viewRevision(revision);
+        } else if (button.dataset.versionAction === "restore") {
+          restoreRevision(revision);
+        }
+      });
+
+      eventFilter.addEventListener("change", function () {
+        state.eventFilter = eventFilter.value;
+        renderEvents();
+      });
+
+      document.getElementById("refreshEventsBtn").addEventListener("click", async function () {
+        await reloadCurrent(false);
+        showToast("交互记录已刷新");
+      });
+
+      document.getElementById("clearEventsBtn").addEventListener("click", clearEvents);
+
+      document.getElementById("exportAllBtn").addEventListener("click", function () { handleExport(false); });
+      document.getElementById("exportWorkBtn").addEventListener("click", function () { handleExport(true); });
+
+      document.getElementById("importArchiveBtn").addEventListener("click", function () { importInput.click(); });
+
+      importInput.addEventListener("change", function () {
+        const file = importInput.files && importInput.files[0];
+        importInput.value = "";
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function () {
+          try {
+            const payload = JSON.parse(reader.result);
+            validateImport(payload);
+            showImportDialog(payload, file.name);
+          } catch (error) {
+            showToast("无法导入：" + error.message, true);
+          }
+        };
+        reader.onerror = function () {
+          showToast("无法读取这个文件", true);
+        };
+        reader.readAsText(file);
+      });
+
+      importReplace.addEventListener("change", function () {
+        importConfirm.textContent = importReplace.checked ? "覆盖并导入" : "合并导入";
+      });
+
+      document.getElementById("importCancel").addEventListener("click", function () {
+        importDialog.close();
+        state.importPayload = null;
+      });
+
+      importConfirm.addEventListener("click", function () {
+        if (!state.importPayload) return;
+        const replace = importReplace.checked;
+        if (replace) {
+          askConfirm(
+            "确定覆盖整座档案馆？",
+            "当前浏览器里的全部作品、配置、素材、版本和交互记录都会被清空，然后导入这份备份。建议先导出一份当前备份。",
+            "覆盖并导入"
+          ).then(function (confirmed) {
+            if (confirmed) performImport(true);
+          });
+        } else {
+          performImport(false);
+        }
+      });
+
+      document.addEventListener("visibilitychange", function () {
+        if (!document.hidden && state.activeId) {
+          reloadCurrent(false).catch(function () { /* 忽略自动刷新失败 */ });
+        }
+      });
+
+      window.addEventListener("pagehide", releaseAssetUrls);
+
+      /* ---------- Init ---------- */
+
+      async function init() {
+        setDbStatus("", "正在连接");
+
+        try {
+          await DB.openDB();
+          setDbStatus("ready", "本地已连接");
+          dbAlert.hidden = true;
+        } catch (error) {
+          console.error(error);
+          setDbStatus("error", "IndexedDB 不可用");
+          dbAlert.hidden = false;
+          document.getElementById("newWorkBtn").disabled = true;
+          showToast("无法打开本地档案馆", true);
+          return;
+        }
+
+        try {
+          await seedArchive();
+          await syncStarWanderer();
+          await refreshWorks();
+
+          if (state.works.length) {
+            await selectWork(state.works[0].id);
+          } else {
+            showEmptyWorkspace();
+            await renderSidebarStats();
+          }
+        } catch (error) {
+          console.error(error);
+          setDbStatus("error", "读取失败");
+          showToast("档案馆初始化失败：" + error.message, true);
+        }
+      }
+
+      init();
+    })();
+  </script>
+</body>
+</html>

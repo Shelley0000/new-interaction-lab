@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07152b">
+  <title>山海之间 | Between Mountains &amp; Dreams</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+    }
+
+    body {
+      background: #07152b;
+      color: #fff;
+      font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
+    }
+
+    #world {
+      position: fixed;
+      inset: 0;
+      display: block;
+      width: 100%;
+      height: 100%;
+      touch-action: none;
+    }
+
+    .vignette {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(ellipse at center, transparent 38%, rgba(1, 8, 24, .42) 100%);
+    }
+
+    .header {
+      position: absolute;
+      z-index: 2;
+      top: 30px;
+      left: 6%;
+      right: 6%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      pointer-events: none;
+    }
+
+    .brand {
+      color: rgba(225, 240, 255, .75);
+      font-size: 12px;
+      letter-spacing: 4px;
+    }
+
+    .tag {
+      padding: 9px 14px;
+      border: 1px solid rgba(255, 255, 255, .24);
+      border-radius: 30px;
+      background: rgba(255, 255, 255, .06);
+      font-size: 11px;
+      letter-spacing: 2px;
+      backdrop-filter: blur(12px);
+    }
+
+    .hero {
+      position: absolute;
+      z-index: 2;
+      top: 18%;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      margin-bottom: 22px;
+      color: #c6ddf3;
+      font-size: 11px;
+      letter-spacing: 6px;
+    }
+
+    h1 {
+      margin: 0;
+      font-family: "Microsoft YaHei", serif;
+      font-size: clamp(43px, 8vw, 90px);
+      font-weight: 300;
+      letter-spacing: .16em;
+      text-indent: .16em;
+      text-shadow: 0 0 45px rgba(185, 225, 255, .38);
+    }
+
+    .subtitle {
+      margin: 20px 0 0;
+      color: rgba(225, 240, 255, .75);
+      font-size: 12px;
+      letter-spacing: 3px;
+      line-height: 2.2;
+    }
+
+    .actions {
+      margin-top: 29px;
+      pointer-events: auto;
+    }
+
+    button {
+      appearance: none;
+      padding: 14px 32px;
+      border: 1px solid rgba(220, 240, 255, .46);
+      border-radius: 40px;
+      background: rgba(235, 245, 255, .10);
+      color: #fff;
+      font: inherit;
+      font-size: 13px;
+      letter-spacing: 3px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 8px 35px rgba(0, 0, 0, .12);
+      cursor: pointer;
+      transition: background .3s, transform .3s;
+    }
+
+    button:hover {
+      transform: translateY(-3px);
+      background: rgba(235, 245, 255, .22);
+    }
+
+    button:focus-visible {
+      outline: 2px solid white;
+      outline-offset: 5px;
+    }
+
+    .footer {
+      position: absolute;
+      z-index: 2;
+      bottom: 28px;
+      width: 100%;
+      color: rgba(225, 240, 255, .62);
+      font-size: 10px;
+      letter-spacing: 2px;
+      line-height: 2;
+      text-align: center;
+      pointer-events: none;
+    }
+
+    @media (max-width: 600px) {
+      .header { top: 23px; left: 5%; right: 5%; }
+      .brand { font-size: 10px; letter-spacing: 2px; }
+      .tag { padding: 8px 10px; font-size: 9px; letter-spacing: 0; }
+      .hero { top: 21%; }
+      .eyebrow { font-size: 9px; letter-spacing: 3px; }
+      h1 { font-size: clamp(39px, 10vw, 64px); }
+      .subtitle { padding: 0 18px; font-size: 11px; letter-spacing: 1px; }
+      .footer { bottom: 20px; font-size: 9px; }
+      button { padding: 13px 26px; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="world" aria-hidden="true"></canvas>
+  <div class="vignette" aria-hidden="true"></div>
+
+  <header class="header">
+    <div class="brand">MOUNTAINS &amp; DREAMS</div>
+    <div class="tag">AN INTERACTIVE JOURNEY</div>
+  </header>
+
+  <main class="hero">
+    <div class="eyebrow">A WORLD BEYOND THE CLOUDS</div>
+    <h1>山海之间</h1>
+    <p class="subtitle">山有尽时 · 梦无边际<br>Move your cursor, follow the light.</p>
+    <div class="actions">
+      <button id="dreamButton" type="button">进入梦境 ✦</button>
+    </div>
+  </main>
+
+  <footer class="footer">
+    移动鼠标探索山海 · 点击天空收集星光<br>
+    MADE WITH IMAGINATION ✦
+  </footer>
+
+  <script>
+    const canvas = document.getElementById("world");
+    const ctx = canvas.getContext("2d");
+    const button = document.getElementById("dreamButton");
+    const title = document.querySelector("h1");
+
+    let W = 0;
+    let H = 0;
+    let dpr = 1;
+    let stars = [];
+    let particles = [];
+    let meteors = [];
+    let meteorTimer = 1.8;
+    let elapsed = 0;
+    let lastTime = 0;
+
+    const pointer = { x: 0, y: 0, tx: 0, ty: 0 };
+    let targetDream = 0;
+    let dream = 0;
+
+    const random = (min, max) => min + Math.random() * (max - min);
+    const lerp = (a, b, t) => a + (b - a) * t;
+
+    function mixColor(a, b, t, alpha = 1) {
+      const r = Math.round(lerp(a[0], b[0], t));
+      const g = Math.round(lerp(a[1], b[1], t));
+      const bl = Math.round(lerp(a[2], b[2], t));
+      return `rgba(${r},${g},${bl},${alpha})`;
+    }
+
+    function resize() {
+      W = window.innerWidth;
+      H = window.innerHeight;
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+      canvas.width = Math.round(W * dpr);
+      canvas.height = Math.round(H * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      const count = Math.min(320, Math.max(100, Math.floor(W * H / 3600)));
+      stars = Array.from({ length: count }, () => ({
+        x: Math.random(),
+        y: random(.02, .82),
+        r: random(.35, 1.7),
+        phase: random(0, Math.PI * 2),
+        speed: random(.35, 1.25),
+        depth: random(.35, 1),
+        blue: random(0, 1)
+      }));
+    }
+
+    window.addEventListener("resize", resize);
+    resize();
+
+    window.addEventListener("pointermove", e => {
+      pointer.tx = (e.clientX / W - .5) * 2;
+      pointer.ty = (e.clientY / H - .5) * 2;
+    }, { passive: true });
+
+    window.addEventListener("pointerdown", e => {
+      if (e.target.closest("button")) return;
+
+      for (let i = 0; i < 22; i++) {
+        const angle = random(0, Math.PI * 2);
+        const speed = random(35, 145);
+        particles.push({
+          x: e.clientX,
+          y: e.clientY,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          life: 1,
+          r: random(1, 3.4)
+        });
+      }
+
+      if (particles.length > 250) {
+        particles.splice(0, particles.length - 250);
+      }
+    });
+
+    function changeText() {
+      title.innerText = "魔法已经开启！🌙";
+    }
+
+    button.addEventListener("click", () => {
+      targetDream = targetDream === 0 ? 1 : 0;
+      button.textContent = targetDream ? "返回月夜 ✦" : "进入梦境 ✦";
+      if (targetDream) {
+        changeText();
+      } else {
+        title.innerText = "山海之间";
+      }
+    });
+
+    function drawSky() {
+      const sky = ctx.createLinearGradient(0, 0, 0, H);
+      sky.addColorStop(0, mixColor([5, 15, 39], [48, 30, 82], dream));
+      sky.addColorStop(.58, mixColor([23, 56, 91], [118, 72, 134], dream));
+      sky.addColorStop(1, mixColor([72, 111, 145], [211, 138, 155], dream));
+      ctx.fillStyle = sky;
+      ctx.fillRect(0, 0, W, H);
+
+      const glow = ctx.createRadialGradient(W * .5, H * .72, 5, W * .5, H * .72, W * .72);
+      glow.addColorStop(0, `rgba(169,210,239,${.16 - dream * .03})`);
+      glow.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = glow;
+      ctx.fillRect(0, 0, W, H);
+    }
+
+    function drawMoon() {
+      const radius = Math.min(W, H) * (W < 600 ? .09 : .075);
+      const x = W * .77 - pointer.x * 19;
+      const y = H * .25 - pointer.y * 12;
+
+      const halo = ctx.createRadialGradient(x, y, radius * .2, x, y, radius * 5);
+      halo.addColorStop(0, `rgba(228,241,255,${.28 - dream * .07})`);
+      halo.addColorStop(.3, `rgba(178,211,255,${.09 - dream * .02})`);
+      halo.addColorStop(1, "rgba(200,200,255,0)");
+      ctx.fillStyle = halo;
+      ctx.beginPath();
+      ctx.arc(x, y, radius * 5, 0, Math.PI * 2);
+      ctx.fill();
+
+      const moon = ctx.createRadialGradient(x - radius * .3, y - radius * .3, 1, x, y, radius);
+      moon.addColorStop(0, "#ffffff");
+      moon.addColorStop(.65, mixColor([231, 245, 255], [255, 227, 239], dream));
+      moon.addColorStop(1, mixColor([169, 206, 231], [239, 182, 207], dream));
+      ctx.fillStyle = moon;
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function drawStars() {
+      for (const star of stars) {
+        const twinkle = .42 + .58 * (Math.sin(elapsed * star.speed + star.phase) + 1) / 2;
+        const x = star.x * W - pointer.x * 18 * star.depth;
+        const y = star.y * H - pointer.y * 12 * star.depth;
+        const red = Math.round(190 + star.blue * 47);
+        const green = Math.round(220 + star.blue * 25);
+
+        ctx.beginPath();
+        ctx.arc(x, y, star.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${red},${green},255,${twinkle * .86})`;
+        ctx.fill();
+
+        if (star.r > 1.35) {
+          ctx.strokeStyle = `rgba(190,225,255,${twinkle * .25})`;
+          ctx.lineWidth = .6;
+          ctx.beginPath();
+          ctx.moveTo(x - 5, y);
+          ctx.lineTo(x + 5, y);
+          ctx.moveTo(x, y - 5);
+          ctx.lineTo(x, y + 5);
+          ctx.stroke();
+        }
+      }
+    }
+
+    function launchMeteor() {
+      const speed = random(480, 760);
+      const angle = random(.48, .72);
+      const vx = Math.cos(angle) * speed;
+      const vy = Math.sin(angle) * speed;
+      const duration = random(1.15, 1.65);
+
+      meteors.push({
+        x: random(-W * .08, W * .72),
+        y: random(0, H * .3),
+        vx,
+        vy,
+        life: duration,
+        duration,
+        length: random(90, 155)
+      });
+    }
+
+    function drawMeteors(dt) {
+      meteorTimer -= dt;
+      if (meteorTimer <= 0) {
+        launchMeteor();
+        meteorTimer = random(4.5, 8);
+      }
+
+      meteors = meteors.filter(meteor => meteor.life > 0);
+      for (const meteor of meteors) {
+        meteor.x += meteor.vx * dt;
+        meteor.y += meteor.vy * dt;
+        meteor.life -= dt;
+
+        const speed = Math.hypot(meteor.vx, meteor.vy);
+        const tailX = meteor.x - meteor.vx / speed * meteor.length;
+        const tailY = meteor.y - meteor.vy / speed * meteor.length;
+        const fade = Math.min(1, meteor.life / .28);
+        const trail = ctx.createLinearGradient(meteor.x, meteor.y, tailX, tailY);
+        trail.addColorStop(0, `rgba(226,245,255,${fade * .95})`);
+        trail.addColorStop(.25, `rgba(152,207,255,${fade * .55})`);
+        trail.addColorStop(1, "rgba(152,207,255,0)");
+
+        ctx.beginPath();
+        ctx.moveTo(meteor.x, meteor.y);
+        ctx.lineTo(tailX, tailY);
+        ctx.strokeStyle = trail;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(meteor.x, meteor.y, 2.2, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(240,249,255,${fade})`;
+        ctx.fill();
+      }
+    }
+
+    const mountains = [
+      { base: .58, amp: 42, wave: .0042, night: [65, 112, 150], day: [149, 112, 161] },
+      { base: .67, amp: 56, wave: .0055, night: [43, 85, 125], day: [124, 91, 148] },
+      { base: .75, amp: 63, wave: .0048, night: [29, 64, 101], day: [100, 75, 131] },
+      { base: .84, amp: 68, wave: .0062, night: [17, 43, 76], day: [73, 57, 110] },
+      { base: .93, amp: 55, wave: .0048, night: [8, 27, 55], day: [46, 40, 83] }
+    ];
+
+    function drawMountains() {
+      mountains.forEach((mountain, index) => {
+        const depth = (index + 1) / mountains.length;
+        const shift = pointer.x * depth * 24;
+        const rise = pointer.y * depth * 17;
+        const base = H * mountain.base + rise;
+
+        ctx.beginPath();
+        for (let x = -12; x <= W + 16; x += 5) {
+          const wx = x + shift;
+          const y = base
+            + Math.sin(wx * mountain.wave + index * 1.8 + elapsed * .09) * mountain.amp
+            + Math.sin(wx * mountain.wave * 2.1 - elapsed * .055 + index) * mountain.amp * .27
+            + Math.cos(wx * .0017 + index) * 28;
+
+          if (x === -12) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+
+        ctx.lineTo(W + 16, H + 20);
+        ctx.lineTo(-12, H + 20);
+        ctx.closePath();
+        ctx.fillStyle = mixColor(mountain.night, mountain.day, dream);
+        ctx.fill();
+
+        ctx.lineWidth = index < 3 ? 1.1 : .7;
+        ctx.strokeStyle = `rgba(204,235,255,${.37 - index * .055})`;
+        ctx.stroke();
+
+        if (index < 4) {
+          const fog = ctx.createLinearGradient(0, base - 22, 0, base + 95);
+          fog.addColorStop(0, "rgba(205,231,251,0)");
+          fog.addColorStop(.55, `rgba(170,208,237,${.052 - index * .008})`);
+          fog.addColorStop(1, "rgba(205,231,251,0)");
+          ctx.fillStyle = fog;
+          ctx.fillRect(0, base - 22, W, 117);
+        }
+      });
+    }
+
+    function drawParticles(dt) {
+      particles = particles.filter(particle => particle.life > 0);
+      for (const particle of particles) {
+        particle.x += particle.vx * dt;
+        particle.y += particle.vy * dt;
+        particle.vx *= Math.pow(.985, dt * 60);
+        particle.vy *= Math.pow(.985, dt * 60);
+        particle.life -= dt * .85;
+
+        const alpha = Math.max(0, particle.life);
+        const halo = ctx.createRadialGradient(particle.x, particle.y, 0, particle.x, particle.y, particle.r * 5);
+        halo.addColorStop(0, `rgba(255,255,255,${alpha})`);
+        halo.addColorStop(.24, `rgba(180,225,255,${alpha * .65})`);
+        halo.addColorStop(1, "rgba(180,225,255,0)");
+        ctx.fillStyle = halo;
+        ctx.beginPath();
+        ctx.arc(particle.x, particle.y, particle.r * 5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    function animate(now) {
+      const dt = lastTime ? Math.min((now - lastTime) / 1000, .05) : 0;
+      lastTime = now;
+      elapsed += dt;
+
+      const easing = 1 - Math.exp(-dt * 3.5);
+      pointer.x = lerp(pointer.x, pointer.tx, easing);
+      pointer.y = lerp(pointer.y, pointer.ty, easing);
+      dream = lerp(dream, targetDream, easing);
+
+      ctx.clearRect(0, 0, W, H);
+      drawSky();
+      drawStars();
+      drawMeteors(dt);
+      drawMoon();
+      drawMountains();
+      drawParticles(dt);
+      requestAnimationFrame(animate);
+    }
+
+    requestAnimationFrame(animate);
+  </script>
+
+  <script src="lab-archive.js"></script>
+  <script>
+    (function () {
+      if (!window.InteractiveLab) return;
+
+      window.InteractiveLab.beginSession("mountain");
+
+      let firstTouch = true;
+      window.addEventListener("pointerdown", function (event) {
+        if (event.target.closest("button")) return;
+
+        window.InteractiveLab.logEvent(
+          "mountain",
+          "gesture",
+          firstTouch ? "第一次触碰山景" : "在山景中点亮微光"
+        );
+        firstTouch = false;
+      }, { passive: true });
+
+      const dreamButton = document.getElementById("dreamButton");
+      if (dreamButton) {
+        dreamButton.addEventListener("click", function () {
+          window.InteractiveLab.logEvent(
+            "mountain",
+            "setting",
+            dreamButton.textContent.indexOf("返回") >= 0 ? "进入梦境" : "返回月夜"
+          );
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
